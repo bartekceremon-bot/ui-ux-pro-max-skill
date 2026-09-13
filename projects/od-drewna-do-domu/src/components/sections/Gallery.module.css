@@ -1,0 +1,39 @@
+.section {
+  padding-block: var(--space-6);
+  background: var(--color-paper);
+}
+
+.head {
+  margin-bottom: var(--space-4);
+  max-width: 32rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-1);
+}
+
+.item {
+  margin: 0;
+  aspect-ratio: 1;
+  background-size: cover;
+  border-radius: var(--radius-sm);
+}
+
+.item:first-child {
+  grid-column: span 2;
+  aspect-ratio: 16 / 9;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .item:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+    aspect-ratio: auto;
+  }
+}

@@ -1,0 +1,60 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: rgba(244, 239, 230, 0.78);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(28, 26, 23, 0.08);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 1.3rem;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--color-ink);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.nav {
+  display: none;
+  gap: 2rem;
+}
+
+.nav a {
+  color: var(--color-ink);
+  text-decoration: none;
+  font-size: 0.92rem;
+  opacity: 0.72;
+  transition: opacity 0.2s ease;
+}
+
+.nav a:hover,
+.nav a:focus-visible {
+  opacity: 1;
+}
+
+.cta {
+  border-color: var(--color-line-strong);
+  color: var(--color-ink);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+}
+
+.cta:hover {
+  border-color: var(--color-ink);
+}
+
+@media (min-width: 900px) {
+  .nav {
+    display: flex;
+  }
+}

@@ -1,0 +1,38 @@
+.section {
+  padding-block: var(--space-7);
+  background: linear-gradient(160deg, var(--color-bark), var(--color-graphite));
+  color: var(--color-paper);
+  text-align: center;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.heading {
+  color: var(--color-paper);
+  max-width: 22ch;
+  font-weight: 400;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.phone {
+  color: var(--color-paper);
+  opacity: 0.8;
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+
+.phone:hover {
+  opacity: 1;
+}

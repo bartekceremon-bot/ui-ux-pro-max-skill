@@ -1,0 +1,37 @@
+:root {
+  /* Palette: złamana biel / ciepła kość słoniowa / drewno / brąz / grafit / leśna zieleń */
+  --color-paper: #f4efe6;
+  --color-ivory: #ece3d2;
+  --color-wood-light: #c9a878;
+  --color-wood: #9c7a52;
+  --color-wood-dark: #6b4f34;
+  --color-bark: #4a3524;
+  --color-bronze: #7a5a3a;
+  --color-graphite: #2a2723;
+  --color-graphite-soft: #3d3a34;
+  --color-ink: #1c1a17;
+  --color-forest: #4b5e46;
+  --color-forest-soft: #6d7d64;
+  --color-line: rgba(28, 26, 23, 0.12);
+  --color-line-strong: rgba(28, 26, 23, 0.22);
+
+  --font-display: 'Fraunces', 'Iowan Old Style', 'Georgia', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6rem;
+  --space-7: 9rem;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-base: 0.7s;
+
+  --container-max: 1280px;
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+}
