@@ -1,0 +1,63 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.panel {
+  min-height: 74vh;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2rem 1.4rem 2.6rem;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s var(--ease-industrial), transform 0.8s var(--ease-industrial);
+}
+
+.panel.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(240, 234, 224, 0.85);
+  margin: 0 0 0.6rem;
+}
+
+.line {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.4rem, 6vw, 2rem);
+  color: #f0eae0;
+  margin: 0;
+  max-width: 16ch;
+}
+
+.chips {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(240, 234, 224, 0.72);
+  margin: 0.7rem 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}

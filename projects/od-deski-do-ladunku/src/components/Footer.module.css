@@ -1,0 +1,27 @@
+.footer {
+  background: #0f0e0d;
+  border-top: 1px solid var(--line-dark);
+  padding-block: var(--space-4);
+}
+
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-on-dark-dim);
+}

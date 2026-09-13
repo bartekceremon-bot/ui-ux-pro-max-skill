@@ -1,0 +1,182 @@
+.wrapper {
+  position: relative;
+  height: 760vh;
+  background: var(--ink);
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: #1b1a17;
+}
+
+.loading {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #1b1a17, #3b352e 60%, #6d4a27);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The subject is a light wooden object on a dark set, and the camera swings it right under the
+   copy. A fixed scrim on the text side keeps the type readable at every point of the sweep. */
+.overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, rgba(15, 14, 13, 0.82) 0%, rgba(15, 14, 13, 0.5) 32%, rgba(15, 14, 13, 0) 62%),
+    linear-gradient(0deg, rgba(15, 14, 13, 0.7) 0%, rgba(15, 14, 13, 0) 38%);
+  pointer-events: none;
+}
+
+.progressTrack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(240, 234, 224, 0.14);
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--wood);
+  transition: width 0.1s linear;
+}
+
+/* --- hero ------------------------------------------------------------------------------- */
+.heroSlot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  will-change: opacity, transform;
+}
+
+.hero {
+  padding-inline: var(--gutter);
+  max-width: min(64rem, 100%);
+  pointer-events: auto;
+}
+
+.heroEyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wood-light);
+  margin-bottom: 1.1rem;
+}
+
+.heroTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  line-height: 0.92;
+  font-size: clamp(3rem, 9vw, 8rem);
+  color: var(--text-on-dark);
+  margin: 0 0 1.4rem;
+  text-shadow: 0 4px 44px rgba(0, 0, 0, 0.6);
+}
+
+.heroLede {
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  color: var(--text-on-dark-dim);
+  max-width: 34ch;
+  margin-bottom: var(--space-3);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+/* flat variant: no canvas behind it, so it needs its own ground */
+.flatWrapper {
+  background: var(--ink);
+}
+
+.heroFlat {
+  padding-block: var(--space-6) var(--space-5);
+  max-width: none;
+}
+
+/* --- beat captions ------------------------------------------------------------------------ */
+.captionSlot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 var(--gutter) var(--space-5);
+  will-change: opacity;
+}
+
+.textBlock {
+  max-width: 44rem;
+  animation: rise 0.7s var(--ease-industrial);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .textBlock {
+    animation: none;
+  }
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wood-light);
+  margin: 0 0 0.8rem;
+}
+
+.line {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.4vw, 2.9rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+  margin: 0;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 1.1rem 0 0;
+}
+
+.chips li {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-on-dark-dim);
+  border: 1px solid var(--line-dark);
+  border-radius: 999px;
+  padding: 0.34rem 0.78rem;
+}

@@ -1,0 +1,46 @@
+:root {
+  /* Industrial premium: drewno, stal, beton, magazyn, światło studyjne */
+  --ink: #131210;
+  --steel: #1c1b18;
+  --concrete: #262420;
+  --concrete-soft: #3a3733;
+  --paper: #faf7f1;
+  --warm-white: #f0eae0;
+  --sand: #e3dbcd;
+
+  --wood: #b8834a;
+  --wood-light: #dcb383;
+  --wood-dark: #6d4a27;
+  --moss: #5c6b4a;
+
+  --text-on-dark: #f0eae0;
+  --text-on-dark-dim: rgba(240, 234, 224, 0.62);
+  --text-on-light: #1c1b18;
+  --text-on-light-dim: rgba(28, 27, 24, 0.66);
+
+  --line-dark: rgba(240, 234, 224, 0.14);
+  --line-dark-strong: rgba(240, 234, 224, 0.3);
+  --line-light: rgba(28, 27, 24, 0.12);
+  --line-light-strong: rgba(28, 27, 24, 0.26);
+
+  --font-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
+  --space-7: 9rem;
+
+  --radius-sm: 2px;
+  --radius-md: 6px;
+
+  --ease-industrial: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration: 0.75s;
+
+  --container: 1320px;
+  --gutter: clamp(1.25rem, 4vw, 4.5rem);
+}

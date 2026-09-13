@@ -1,0 +1,128 @@
+.viewer {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+
+.canvasWrap {
+  position: relative;
+  aspect-ratio: 16 / 11;
+  border: 1px solid var(--line-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #1b1a17;
+}
+
+.controls {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+}
+
+.controls :global(.btn) {
+  background: rgba(19, 18, 16, 0.72);
+  color: var(--text-on-dark);
+  border-color: var(--line-dark-strong);
+  backdrop-filter: blur(6px);
+  padding: 0.75rem 1.3rem;
+}
+
+.controls :global(.btn):hover {
+  border-color: var(--wood-light);
+  color: var(--wood-light);
+}
+
+.panel {
+  border: 1px solid var(--line-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--warm-white);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.panelKicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wood-dark);
+}
+
+.panelTitle {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.panelInfo {
+  color: var(--text-on-light-dim);
+  font-size: 0.95rem;
+}
+
+.facts {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.facts dt {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wood-dark);
+  margin-bottom: 0.15rem;
+}
+
+.facts dd {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.legend {
+  list-style: none;
+  padding: 0;
+  margin: 0.2rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-on-light-dim);
+}
+
+.legend li::before {
+  content: '— ';
+  color: var(--wood);
+}
+
+.clear {
+  align-self: flex-start;
+  margin-top: 0.4rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line-light-strong);
+  padding: 0 0 2px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--text-on-light);
+}
+
+.clear:hover {
+  border-color: var(--wood-dark);
+}
+
+@media (min-width: 960px) {
+  .viewer {
+    grid-template-columns: 1.75fr 1fr;
+    align-items: stretch;
+  }
+
+  .canvasWrap {
+    aspect-ratio: auto;
+    min-height: 30rem;
+  }
+}
