@@ -95,10 +95,29 @@ export function buildLoad(materials: SceneMaterials): LoadModel {
   const position = new THREE.Vector3();
   const scale = new THREE.Vector3();
 
-  // Stretch film: an open-topped shell that grows upward as the wrap climbs the load.
-  const filmGeometry = new THREE.BoxGeometry(PALLET_SIZE.length + 0.04, LOAD_HEIGHT + 0.02, PALLET_SIZE.width + 0.04);
-  const film = new THREE.Mesh(filmGeometry, materials.film);
-  film.renderOrder = 2;
+  // Stretch film: four side panels, not a closed box. Real wrap goes round the load and leaves
+  // the top open, and a lid of translucent material over the cartons reads as glass, not film.
+  // Each panel's geometry is anchored at its bottom edge, so the group scales upward from the
+  // deck as the wrap climbs.
+  const film = new THREE.Group();
+  const filmWidth = PALLET_SIZE.length + 0.03;
+  const filmDepth = PALLET_SIZE.width + 0.03;
+  const panels: Array<[number, number, number, number, number]> = [
+    // [width, x, z, rotationY, ---]
+    [filmWidth, 0, filmDepth / 2, 0, 0],
+    [filmWidth, 0, -filmDepth / 2, Math.PI, 0],
+    [filmDepth, filmWidth / 2, 0, Math.PI / 2, 0],
+    [filmDepth, -filmWidth / 2, 0, -Math.PI / 2, 0],
+  ];
+  for (const [panelWidth, x, z, rotationY] of panels) {
+    const geometry = new THREE.PlaneGeometry(panelWidth, 1);
+    geometry.translate(0, 0.5, 0);
+    const panel = new THREE.Mesh(geometry, materials.film);
+    panel.position.set(x, 0, z);
+    panel.rotation.y = rotationY;
+    panel.renderOrder = 2;
+    film.add(panel);
+  }
   film.visible = false;
   group.add(film);
 
@@ -134,9 +153,8 @@ export function buildLoad(materials: SceneMaterials): LoadModel {
     const wrap = smoothstep(filmProgress);
     film.visible = wrap > 0.01;
     if (film.visible) {
-      film.scale.set(1, wrap, 1);
-      // Grow from the deck upward rather than from the middle out.
-      film.position.set(0, PALLET_HEIGHT + (LOAD_HEIGHT * wrap) / 2, 0);
+      film.scale.set(1, Math.max(0.001, wrap * LOAD_HEIGHT), 1);
+      film.position.set(0, PALLET_HEIGHT, 0);
     }
   };
 

@@ -53,7 +53,7 @@ export function woodGrainTexture(seed = 1): THREE.CanvasTexture {
 /** End grain for the raw timber close-up: concentric growth rings on the cut face. */
 export function endGrainTexture(): THREE.CanvasTexture {
   const { element, ctx } = canvas(256, 256);
-  ctx.fillStyle = '#d8b483';
+  ctx.fillStyle = '#c4ae90';
   ctx.fillRect(0, 0, 256, 256);
   for (let i = 26; i > 0; i--) {
     ctx.beginPath();
@@ -136,6 +136,7 @@ export type SceneMaterials = {
   steel: THREE.MeshStandardMaterial;
   steelDark: THREE.MeshStandardMaterial;
   nail: THREE.MeshStandardMaterial;
+  beacon: THREE.MeshStandardMaterial;
   film: THREE.MeshPhysicalMaterial;
   floor: THREE.MeshStandardMaterial;
 };
@@ -146,18 +147,25 @@ export type SceneMaterials = {
  */
 export function createMaterials(): SceneMaterials {
   const grain = woodGrainTexture(3);
-  const wood = ['#b08d61', '#a37f52', '#bd9b6e'].map(
-    (color) => new THREE.MeshStandardMaterial({ color, map: grain, roughness: 0.86, metalness: 0 }),
+  const wood = ['#b08d61', '#a37f52', '#bd9b6e', '#aa8558', '#b79365'].map(
+    (color, i) =>
+      new THREE.MeshStandardMaterial({ color, map: grain, roughness: 0.83 + (i % 3) * 0.02, metalness: 0 }),
   );
 
   return {
     wood,
-    rawTimber: new THREE.MeshStandardMaterial({ color: '#a98456', map: grain, roughness: 0.92 }),
+    rawTimber: new THREE.MeshStandardMaterial({ color: '#a08d76', map: grain, roughness: 0.92 }),
     endGrain: new THREE.MeshStandardMaterial({ map: endGrainTexture(), roughness: 0.7 }),
     carton: new THREE.MeshStandardMaterial({ map: cartonTexture(), color: '#9d7448', roughness: 0.92, metalness: 0 }),
     steel: new THREE.MeshStandardMaterial({ color: '#8d9298', roughness: 0.42, metalness: 0.75 }),
-    steelDark: new THREE.MeshStandardMaterial({ color: '#2f3134', roughness: 0.55, metalness: 0.6 }),
+    steelDark: new THREE.MeshStandardMaterial({ color: '#343943', roughness: 0.66, metalness: 0.35 }),
     nail: new THREE.MeshStandardMaterial({ color: '#6f6b66', roughness: 0.5, metalness: 0.7 }),
+    beacon: new THREE.MeshStandardMaterial({
+      color: '#e8a33c',
+      emissive: '#e8862c',
+      emissiveIntensity: 1.6,
+      roughness: 0.35,
+    }),
     film: new THREE.MeshPhysicalMaterial({
       map: filmTexture(),
       color: '#dbe8ee',
@@ -165,10 +173,12 @@ export function createMaterials(): SceneMaterials {
       metalness: 0,
       transmission: 0,
       transparent: true,
-      opacity: 0.26,
+      opacity: 0.34,
       side: THREE.DoubleSide,
       depthWrite: false,
     }),
-    floor: new THREE.MeshStandardMaterial({ color: '#2a2724', roughness: 0.72, metalness: 0.05 }),
+    // DoubleSide: the cyclorama is an open ribbon, and a backdrop that vanishes when the
+    // camera crosses its plane is a worse bug than one extra face per triangle.
+    floor: new THREE.MeshStandardMaterial({ color: '#2b2825', roughness: 0.78, metalness: 0.04, side: THREE.DoubleSide }),
   };
 }

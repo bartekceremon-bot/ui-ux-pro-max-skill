@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { useReveal } from '../../hooks/useReveal';
 import { useCanRender3D } from '../../hooks/usePreferences';
 import { PARTS } from '../scene/builders/palletParts';
+import { SectionHead } from './SectionHead';
 import styles from './sections.module.css';
 import specStyles from './Spec.module.css';
 
@@ -22,14 +23,13 @@ export function Spec(): JSX.Element {
   return (
     <section id="specyfikacja" className={`section-light ${styles.section}`}>
       <div className="container" ref={ref}>
-        <div className={`reveal ${styles.head}`}>
-          <p className="eyebrow">Specyfikacja</p>
-          <h2>Paleta rozłożona na części</h2>
-          <p className={`lede ${styles.headLede}`}>
-            Model odpowiada konstrukcji, którą produkujemy: {PARTS.length} elementów i połączenia.
-            Kliknij element, żeby zobaczyć jego rolę.
-          </p>
-        </div>
+        <SectionHead
+          index="05"
+          kicker="Specyfikacja"
+          title="Paleta rozłożona na części"
+          lede={`Model odpowiada konstrukcji, którą produkujemy: ${PARTS.length} elementów i połączenia. Kliknij element, żeby zobaczyć jego rolę.`}
+          aside={<p>Widok eksplodowany pokazuje kolejność montażu.</p>}
+        />
 
         {can3D ? (
           <Suspense fallback={<div className={specStyles.placeholder} aria-hidden="true" />}>

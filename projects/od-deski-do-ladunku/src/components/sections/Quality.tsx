@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useReveal } from '../../hooks/useReveal';
+import { SectionHead } from './SectionHead';
 import styles from './sections.module.css';
 
 const STAGES = [
@@ -41,37 +42,36 @@ export function Quality(): JSX.Element {
   return (
     <section id="jakosc" className={`section-light ${styles.section}`}>
       <div className="container" ref={ref}>
-        <div className={`reveal ${styles.head}`}>
-          <p className="eyebrow">Jakość</p>
-          <h2>Cztery punkty kontroli</h2>
-          <p className={`lede ${styles.headLede}`}>
-            Materiał → produkcja → kontrola → gotowy produkt. Wybierz etap, żeby zobaczyć, co jest sprawdzane.
-          </p>
-        </div>
-
-        <ul className={`${styles.chain} reveal`}>
-          {STAGES.map((stage) => (
-            <li key={stage.id} className={styles.chainItem}>
-              <button
-                type="button"
-                className={styles.chainButton}
-                aria-pressed={stage.id === activeId}
-                onClick={() => setActiveId(stage.id)}
-              >
-                <span className={styles.chainStage}>{stage.stage}</span>
-                <span className={styles.chainTitle}>{stage.title}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div className={styles.chainDetail} aria-live="polite">
-          <p>{active.summary}</p>
-          <ul>
-            {active.checks.map((check) => (
-              <li key={check}>{check}</li>
+        <SectionHead
+          index="04"
+          kicker="Jakość"
+          title="Cztery punkty kontroli"
+          lede="Materiał → produkcja → kontrola → gotowy produkt. Wybierz etap, żeby zobaczyć, co sprawdzamy."
+        />
+        <div className={`${styles.chainLayout} reveal`}>
+          <ul className={styles.chain}>
+            {STAGES.map((stage) => (
+              <li key={stage.id}>
+                <button
+                  type="button"
+                  className={styles.chainButton}
+                  aria-pressed={stage.id === activeId}
+                  onClick={() => setActiveId(stage.id)}
+                >
+                  <span className={styles.chainStage}>{stage.stage}</span>
+                  <span className={styles.chainTitle}>{stage.title}</span>
+                </button>
+              </li>
             ))}
           </ul>
+          <div className={styles.chainDetail} aria-live="polite">
+            <p>{active.summary}</p>
+            <ul>
+              {active.checks.map((check) => (
+                <li key={check}>{check}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>

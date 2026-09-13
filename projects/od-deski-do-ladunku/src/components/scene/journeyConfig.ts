@@ -90,16 +90,16 @@ export type CameraKey = {
  * direction changes inside a beat.
  */
 export const CAMERA_PATH: CameraKey[] = [
-  { t: 0.0, position: [1.12, 0.62, 1.42], target: [0, 0.14, 0], fov: 32 },
+  { t: 0.0, position: [1.38, 0.8, 1.78], target: [0.02, 0.11, -0.05], fov: 31 },
   { t: 0.15, position: [1.55, 0.86, 1.62], target: [0, 0.2, 0], fov: 34 },
   { t: 0.3, position: [0.1, 1.78, 2.15], target: [0, 0.3, 0], fov: 36 },
   { t: 0.45, position: [2.05, 1.36, 2.05], target: [0, 0.26, 0], fov: 34 },
   { t: 0.58, position: [1.86, 1.04, 1.9], target: [0, 0.17, 0], fov: 34 },
-  { t: 0.68, position: [1.74, 0.5, 1.66], target: [0, 0.1, 0], fov: 32 },
+  { t: 0.68, position: [1.95, 0.56, 1.86], target: [0, 0.1, 0], fov: 32 },
   { t: 0.75, position: [-1.76, 0.76, 1.86], target: [0, 0.13, 0], fov: 33 },
   { t: 0.85, position: [-1.62, 1.55, 2.66], target: [0, 0.5, 0], fov: 34 },
-  { t: 0.93, position: [0.35, 1.68, 3.45], target: [0, 0.58, 0], fov: 32 },
-  { t: 1.0, position: [2.55, 1.6, 4.15], target: [0.1, 0.62, 0], fov: 29 },
+  { t: 0.93, position: [0.3, 1.75, 3.9], target: [0.05, 0.6, 0], fov: 30 },
+  { t: 1.0, position: [2.2, 1.9, 5.05], target: [0.5, 0.62, 0], fov: 27 },
 ];
 
 function smoothstep(x: number) {

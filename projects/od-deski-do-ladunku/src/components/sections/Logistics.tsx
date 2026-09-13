@@ -1,32 +1,13 @@
 import { useState } from 'react';
 import { useReveal } from '../../hooks/useReveal';
+import { SectionHead } from './SectionHead';
 import styles from './sections.module.css';
 
 const LINKS = [
-  {
-    id: 'paleta',
-    stage: 'Krok 01',
-    title: 'Paleta',
-    summary: 'Gotowa konstrukcja odbierana z linii, opisana i odłożona na stos.',
-  },
-  {
-    id: 'magazyn',
-    stage: 'Krok 02',
-    title: 'Magazyn',
-    summary: 'Zapas trzymany pod bieżące zamówienia, sztaplowany według typu.',
-  },
-  {
-    id: 'transport',
-    stage: 'Krok 03',
-    title: 'Transport',
-    summary: 'Załadunek na zestaw i wysyłka pod wskazany adres.',
-  },
-  {
-    id: 'klient',
-    stage: 'Krok 04',
-    title: 'Klient',
-    summary: 'Rozładunek u odbiorcy i wejście palet do jego obiegu.',
-  },
+  { id: 'paleta', stage: 'Krok 01', title: 'Paleta', summary: 'Gotowa konstrukcja odbierana z linii, opisana i odłożona na stos.' },
+  { id: 'magazyn', stage: 'Krok 02', title: 'Magazyn', summary: 'Zapas trzymany pod bieżące zamówienia, sztaplowany według typu.' },
+  { id: 'transport', stage: 'Krok 03', title: 'Transport', summary: 'Załadunek na zestaw i wysyłka pod wskazany adres.' },
+  { id: 'klient', stage: 'Krok 04', title: 'Klient', summary: 'Rozładunek u odbiorcy i wejście palet do jego obiegu.' },
 ];
 
 export function Logistics(): JSX.Element {
@@ -37,18 +18,17 @@ export function Logistics(): JSX.Element {
   return (
     <section id="logistyka" className={`section-dark ${styles.section}`}>
       <div className="container" ref={ref}>
-        <div className={`reveal ${styles.head}`}>
-          <p className="eyebrow">Logistyka</p>
-          <h2>Droga palety</h2>
-          <p className={`lede ${styles.headLede}`}>
-            Paleta → magazyn → transport → klient. Terminy i dostępność ustalamy przy zamówieniu.
-          </p>
-        </div>
-
-        <div className={styles.chainDark}>
-          <ul className={`${styles.chain} reveal`}>
+        <SectionHead
+          index="06"
+          kicker="Logistyka"
+          title="Droga palety"
+          lede="Paleta → magazyn → transport → klient. Terminy i dostępność ustalamy przy zamówieniu."
+          aside={<p>Zasięg dostaw: [ZASIĘG DOSTAW].</p>}
+        />
+        <div className={`${styles.chainLayout} ${styles.chainDark} reveal`}>
+          <ul className={styles.chain}>
             {LINKS.map((link) => (
-              <li key={link.id} className={styles.chainItem}>
+              <li key={link.id}>
                 <button
                   type="button"
                   className={styles.chainButton}

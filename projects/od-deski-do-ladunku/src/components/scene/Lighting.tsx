@@ -31,8 +31,10 @@ export function Lighting(): JSX.Element | null {
       subject: [0, 0.35, 0],
       distance: 3.1,
       environmentIntensity: 0.45,
-      key: { color: '#fff4e6', intensity: 16, width: 1.6, height: 2.2, elevationDeg: 38, azimuthDeg: 315 },
-      fill: { color: '#e8f0ff', intensity: 5, width: 2.4, height: 1.4, elevationDeg: 14, azimuthDeg: 65 },
+      // Key pulled back and cooled: at 16 the warm panel drove the wood into orange under ACES,
+      // which read as plastic rather than pine. More fill keeps the shadow side legible.
+      key: { color: '#fff8f0', intensity: 12.5, width: 1.6, height: 2.2, elevationDeg: 38, azimuthDeg: 315 },
+      fill: { color: '#e8f0ff', intensity: 6.2, width: 2.4, height: 1.4, elevationDeg: 14, azimuthDeg: 65 },
       rim: { color: '#ffffff', intensity: 11, width: 0.5, height: 1.8, elevationDeg: 28, azimuthDeg: 168 },
       contact: { color: '#ffffff', intensity: 1.1, mapSize: 1024, bias: -0.0002, normalBias: 0.02, extent: 4 },
     });

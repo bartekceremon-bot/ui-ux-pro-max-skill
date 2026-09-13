@@ -10,6 +10,12 @@ import { buildForklift } from './builders/forklift';
 import { phasesAt, sampleCamera } from './journeyConfig';
 import { scrollState } from './scrollStore';
 
+/** Eased 0..1 ramp between two scroll positions. */
+function smooth(t: number, from: number, to: number) {
+  const c = Math.min(1, Math.max(0, (t - from) / (to - from)));
+  return c * c * (3 - 2 * c);
+}
+
 /**
  * One studio, one product. Scroll drives a single timeline: the material becomes boards, the
  * boards become a pallet, the pallet takes a load, and the load leaves on a truck. Nothing here
@@ -38,7 +44,16 @@ export function JourneyScene(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useFrame(() => {
+  useFrame((state) => {
+    if (import.meta.env.DEV) {
+      // Draw-call budget probe for local profiling; stripped from production builds.
+      (window as unknown as { __sceneInfo?: unknown }).__sceneInfo = {
+        calls: state.gl.info.render.calls,
+        triangles: state.gl.info.render.triangles,
+        geometries: state.gl.info.memory.geometries,
+        textures: state.gl.info.memory.textures,
+      };
+    }
     const t = scrollState.t;
     const phases = phasesAt(t);
 
@@ -54,9 +69,18 @@ export function JourneyScene(): JSX.Element {
     }
 
     studio.updateTimber(phases.timber);
+
+    // A breath of movement while the product is the subject, so a reader who stops scrolling is
+    // not looking at a freeze frame. It fades out before the truck arrives — the forks have to
+    // line up with the pockets, and they cannot do that against a turning pallet.
+    const alive = Math.min(smooth(t, 0.62, 0.7), 1 - smooth(t, 0.86, 0.92));
+    liftGroup.rotation.y = Math.sin(state.clock.elapsedTime * 0.32) * 0.075 * Math.max(0, alive);
+
     pallet.update({ boards: phases.boards, components: phases.components, assembly: phases.assembly });
     load.update(phases.cartons, phases.film);
-    liftGroup.position.y = forklift.update(phases.approach, phases.lift);
+    const liftHeight = forklift.update(phases.approach, phases.lift);
+    liftGroup.position.y = liftHeight;
+    studio.updateGrounding(liftHeight);
   });
 
   return (

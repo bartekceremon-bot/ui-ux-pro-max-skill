@@ -1,31 +1,45 @@
 :root {
   /* Industrial premium: drewno, stal, beton, magazyn, światło studyjne */
-  --ink: #131210;
+  --ink: #121110;
+  --ink-raised: #191817;
   --steel: #1c1b18;
   --concrete: #262420;
   --concrete-soft: #3a3733;
-  --paper: #faf7f1;
-  --warm-white: #f0eae0;
+  --paper: #f7f3ec;
+  --paper-raised: #fffdf8;
+  --warm-white: #efe9de;
   --sand: #e3dbcd;
 
   --wood: #b8834a;
   --wood-light: #dcb383;
-  --wood-dark: #6d4a27;
+  --wood-dark: #7a5326;
   --moss: #5c6b4a;
 
-  --text-on-dark: #f0eae0;
-  --text-on-dark-dim: rgba(240, 234, 224, 0.62);
-  --text-on-light: #1c1b18;
-  --text-on-light-dim: rgba(28, 27, 24, 0.66);
+  --text-on-dark: #f2ede4;
+  --text-on-dark-dim: rgba(242, 237, 228, 0.66);
+  --text-on-dark-faint: rgba(242, 237, 228, 0.42);
+  --text-on-light: #1a1917;
+  --text-on-light-dim: rgba(26, 25, 23, 0.68);
+  --text-on-light-faint: rgba(26, 25, 23, 0.45);
 
-  --line-dark: rgba(240, 234, 224, 0.14);
-  --line-dark-strong: rgba(240, 234, 224, 0.3);
-  --line-light: rgba(28, 27, 24, 0.12);
-  --line-light-strong: rgba(28, 27, 24, 0.26);
+  --line-dark: rgba(242, 237, 228, 0.13);
+  --line-dark-strong: rgba(242, 237, 228, 0.3);
+  --line-light: rgba(26, 25, 23, 0.11);
+  --line-light-strong: rgba(26, 25, 23, 0.24);
 
   --font-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Type scale — one ratio, so nothing is sized by feel */
+  --text-xs: 0.72rem;
+  --text-sm: 0.84rem;
+  --text-base: 1rem;
+  --text-lg: clamp(1.05rem, 1.2vw, 1.2rem);
+  --text-xl: clamp(1.25rem, 1.8vw, 1.55rem);
+  --text-2xl: clamp(1.6rem, 2.6vw, 2.1rem);
+  --text-3xl: clamp(2rem, 4.4vw, 3.5rem);
+  --text-hero: clamp(2.9rem, 8.6vw, 7.5rem);
 
   --space-1: 0.5rem;
   --space-2: 1rem;
@@ -33,14 +47,17 @@
   --space-4: 2.5rem;
   --space-5: 4rem;
   --space-6: 6.5rem;
-  --space-7: 9rem;
+  --space-7: 9.5rem;
 
   --radius-sm: 2px;
   --radius-md: 6px;
+  --radius-lg: 12px;
 
   --ease-industrial: cubic-bezier(0.16, 1, 0.3, 1);
-  --duration: 0.75s;
+  --duration: 0.7s;
 
   --container: 1320px;
   --gutter: clamp(1.25rem, 4vw, 4.5rem);
+
+  --header-height: 4.4rem;
 }

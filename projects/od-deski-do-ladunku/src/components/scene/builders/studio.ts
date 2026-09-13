@@ -6,20 +6,89 @@ export type StudioModel = {
   group: THREE.Group;
   /** Scene 01: raw sawn timber, cleared as the boards take over. */
   updateTimber: (present: number) => void;
+  /** Keeps the contact shadow under the product as it is lifted off the ground. */
+  updateGrounding: (liftHeight: number) => void;
 };
 
 /**
- * The set: one concrete floor and three rough beams for the opening shot. Everything else in
- * the scene is the product, which is the point of a studio — nothing competes with the subject.
+ * A photographic infinity curve: floor, a filleted transition, and a back wall as one continuous
+ * surface. A flat plane against a gradient leaves a hard horizon line exactly where the eye looks
+ * for the product's silhouette; a cove removes it, which is the whole reason product studios are
+ * built this way.
  */
+function cycloramaGeometry(
+  width: number,
+  floorDepth: number,
+  coveStart: number,
+  radius: number,
+  wallHeight: number,
+): THREE.BufferGeometry {
+  // Side profile as [z, y]: floor toward the camera, a quarter-circle cove, then the back wall.
+  // The cove's centre sits at (-coveStart, radius), so the arc leaves the floor tangentially at
+  // (-coveStart, 0) and meets the wall tangentially at (-coveStart - radius, radius).
+  const profile: Array<[number, number]> = [[floorDepth, 0], [-coveStart, 0]];
+  const SEGMENTS = 16;
+  for (let i = 1; i <= SEGMENTS; i++) {
+    const angle = (i / SEGMENTS) * (Math.PI / 2);
+    profile.push([-coveStart - radius * Math.sin(angle), radius - radius * Math.cos(angle)]);
+  }
+  profile.push([-coveStart - radius, wallHeight]);
+
+  const half = width / 2;
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  for (let i = 0; i < profile.length - 1; i++) {
+    const [z0, y0] = profile[i];
+    const [z1, y1] = profile[i + 1];
+    const v0 = i / (profile.length - 1);
+    const v1 = (i + 1) / (profile.length - 1);
+    // two triangles per profile segment, spanning the full width
+    positions.push(-half, y0, z0, half, y0, z0, half, y1, z1);
+    positions.push(-half, y0, z0, half, y1, z1, -half, y1, z1);
+    uvs.push(0, v0, 1, v0, 1, v1, 0, v0, 1, v1, 0, v1);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+/** Soft radial darkening painted under the product: the cue that says "resting on the floor". */
+function contactShadowTexture(): THREE.CanvasTexture {
+  const size = 256;
+  const canvas = Object.assign(document.createElement('canvas'), { width: size, height: size });
+  const ctx = canvas.getContext('2d')!;
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, size * 0.06, size / 2, size / 2, size * 0.5);
+  gradient.addColorStop(0, 'rgba(0,0,0,0.72)');
+  gradient.addColorStop(0.45, 'rgba(0,0,0,0.34)');
+  gradient.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
 export function buildStudio(materials: SceneMaterials): StudioModel {
   const group = new THREE.Group();
 
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(24, 24), materials.floor);
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -0.001;
-  floor.receiveShadow = true;
-  group.add(floor);
+  const cyclorama = new THREE.Mesh(cycloramaGeometry(30, 9, 2.6, 3.2, 9), materials.floor);
+  cyclorama.receiveShadow = true;
+  group.add(cyclorama);
+
+  const shadowMaterial = new THREE.MeshBasicMaterial({
+    map: contactShadowTexture(),
+    transparent: true,
+    opacity: 0.85,
+    depthWrite: false,
+  });
+  const contact = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.9), shadowMaterial);
+  contact.rotation.x = -Math.PI / 2;
+  contact.position.y = 0.004;
+  contact.renderOrder = 1;
+  group.add(contact);
 
   // Raw timber for the opening close-up. kit-core's bevelledBox extrudes along Z, and
   // ExtrudeGeometry groups its caps as material 0 and its walls as material 1 — so a beam built
@@ -55,7 +124,15 @@ export function buildStudio(materials: SceneMaterials): StudioModel {
     });
   };
 
-  updateTimber(1);
+  const updateGrounding = (liftHeight: number) => {
+    // Lifted load: the contact patch spreads and fades, the way a real shadow does.
+    const spread = 1 + liftHeight * 1.5;
+    contact.scale.set(spread, spread, 1);
+    shadowMaterial.opacity = 0.85 * Math.max(0, 1 - liftHeight * 1.8);
+  };
 
-  return { group, updateTimber };
+  updateTimber(1);
+  updateGrounding(0);
+
+  return { group, updateTimber, updateGrounding };
 }

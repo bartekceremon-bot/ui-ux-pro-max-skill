@@ -1,7 +1,7 @@
 .viewer {
   display: grid;
   gap: var(--space-3);
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .canvasWrap {
@@ -117,7 +117,7 @@
 
 @media (min-width: 960px) {
   .viewer {
-    grid-template-columns: 1.75fr 1fr;
+    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
     align-items: stretch;
   }
 

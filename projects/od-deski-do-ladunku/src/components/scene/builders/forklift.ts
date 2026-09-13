@@ -74,10 +74,56 @@ export function buildForklift(materials: SceneMaterials): ForkliftModel {
   counterweight.castShadow = true;
   group.add(counterweight);
 
-  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.34, 0.56), materials.steelDark);
-  cab.position.set(1.5, 0.8, 0);
+  // Operator deck, seat and steering column. Three small solids, but without them the machine
+  // reads as a stack of grey boxes rather than as something a person drives.
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.1, 0.56), materials.steelDark);
+  cab.position.set(1.52, 0.69, 0);
   cab.castShadow = true;
   group.add(cab);
+
+  const seatBase = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.09, 0.34), materials.steelDark);
+  seatBase.position.set(1.62, 0.79, 0);
+  seatBase.castShadow = true;
+  group.add(seatBase);
+
+  const seatBack = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.34), materials.steelDark);
+  seatBack.position.set(1.74, 0.94, 0);
+  seatBack.castShadow = true;
+  group.add(seatBack);
+
+  const column = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.3, 8), materials.steel);
+  column.position.set(1.32, 0.86, 0);
+  column.rotation.z = 0.28;
+  group.add(column);
+
+  const wheelRim = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.014, 6, 16), materials.steelDark);
+  wheelRim.position.set(1.28, 1.0, 0);
+  wheelRim.rotation.set(Math.PI / 2, 0, 0.28);
+  group.add(wheelRim);
+
+  // Overhead guard: the frame over the driver is what makes a boxy shape read as a forklift.
+  const guardPost = new THREE.BoxGeometry(0.06, 0.82, 0.06);
+  for (const x of [1.16, 1.84]) {
+    for (const z of [-0.3, 0.3]) {
+      const post = new THREE.Mesh(guardPost, materials.steelDark);
+      post.position.set(x, 0.98, z);
+      post.castShadow = true;
+      group.add(post);
+    }
+  }
+  const guardRoof = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.05, 0.72), materials.steelDark);
+  guardRoof.position.set(1.5, 1.41, 0);
+  guardRoof.castShadow = true;
+  group.add(guardRoof);
+
+  const beaconBase = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.02, 10), materials.steelDark);
+  beaconBase.position.set(1.5, 1.445, 0);
+  group.add(beaconBase);
+
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 8), materials.beacon);
+  beacon.position.set(1.5, 1.47, 0);
+  beacon.scale.y = 0.85;
+  group.add(beacon);
 
   const wheelGeometry = new THREE.CylinderGeometry(0.14, 0.14, 0.12, 18);
   wheelGeometry.rotateX(Math.PI / 2);

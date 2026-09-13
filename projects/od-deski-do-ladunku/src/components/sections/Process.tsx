@@ -1,4 +1,5 @@
 import { useReveal } from '../../hooks/useReveal';
+import { SectionHead } from './SectionHead';
 import styles from './sections.module.css';
 
 const STEPS = [
@@ -16,20 +17,18 @@ export function Process(): JSX.Element {
   return (
     <section id="proces" className={`section-light ${styles.section}`}>
       <div className="container" ref={ref}>
-        <div className={`reveal ${styles.head}`}>
-          <p className="eyebrow">Nasz proces</p>
-          <h2>Siedem etapów, jedna linia</h2>
-          <p className={`lede ${styles.headLede}`}>
-            Od przyjęcia surowca po załadunek. Każdy etap ma swój moment kontroli.
-          </p>
-        </div>
+        <SectionHead
+          index="01"
+          kicker="Nasz proces"
+          title="Siedem etapów, jedna linia"
+          lede="Od przyjęcia surowca po załadunek. Każdy etap ma swój moment kontroli."
+          aside={<p>Terminy realizacji zależą od typu palety i wielkości zamówienia.</p>}
+        />
         <ol className={styles.timeline}>
           {STEPS.map((step) => (
             <li key={step.n} className={`${styles.step} reveal`}>
               <span className={styles.stepNumber}>{step.n}</span>
-              <div className={styles.stepBody}>
-                <h3>{step.title}</h3>
-              </div>
+              <h3 className={styles.stepTitle}>{step.title}</h3>
               <p className={styles.stepText}>{step.text}</p>
             </li>
           ))}
