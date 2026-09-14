@@ -24,6 +24,11 @@ export type PalletModel = {
   update: (phases: PalletPhases) => void;
   /** Exploded view as a pure display offset on top of the rest pose — never a second pose. */
   setExplode: (factor: number) => void;
+  /**
+   * Lifts one part clear of the others so a picked element reads as picked. Same rule as the
+   * exploded view: a display offset folded into the one pose pipeline, never a second pose.
+   */
+  setFocus: (id: string | null, amount: number) => void;
 };
 
 const EXPLODE_SCALE = 0.34;
@@ -104,6 +109,9 @@ export function buildPallet(materials: SceneMaterials, seed = 1): PalletModel {
   group.add(nailHead);
 
   const explode = { factor: 0 };
+  const focus: { id: string | null; amount: number } = { id: null, amount: 0 };
+  /** How far a picked part steps out of the stack, in metres at full amount. */
+  const FOCUS_LIFT = 0.055;
 
   const applyNails = (reveal: number) => {
     const shown = smoothstep(reveal);
@@ -176,11 +184,12 @@ export function buildPallet(materials: SceneMaterials, seed = 1): PalletModel {
         rotationBlend = 1;
       }
 
+      const focused = focus.id === part.id ? focus.amount * FOCUS_LIFT : 0;
       mesh.visible = visible;
       mesh.position.set(
-        px + part.explodeDir[0] * EXPLODE_SCALE * explode.factor,
-        py + part.explodeDir[1] * EXPLODE_SCALE * explode.factor,
-        pz + part.explodeDir[2] * EXPLODE_SCALE * explode.factor,
+        px + part.explodeDir[0] * (EXPLODE_SCALE * explode.factor + focused),
+        py + part.explodeDir[1] * (EXPLODE_SCALE * explode.factor + focused),
+        pz + part.explodeDir[2] * (EXPLODE_SCALE * explode.factor + focused),
       );
       mesh.rotation.set(
         part.spawnRotation[0] * rotationBlend,
@@ -201,6 +210,10 @@ export function buildPallet(materials: SceneMaterials, seed = 1): PalletModel {
     update,
     setExplode: (factor: number) => {
       explode.factor = factor;
+    },
+    setFocus: (id: string | null, amount: number) => {
+      focus.id = id;
+      focus.amount = amount;
     },
   };
 }

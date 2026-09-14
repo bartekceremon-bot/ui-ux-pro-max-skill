@@ -154,7 +154,13 @@ export function Products(): JSX.Element {
           ))}
         </ul>
 
-        <p className={`${styles.offerNote} reveal`}>{product.text}</p>
+        <div className={`${styles.offerNote} reveal`}>
+          <p>{product.text}</p>
+          <a className={styles.offerNoteLink} href="#kontakt">
+            Zapytaj o ten typ
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
       </div>
     </section>
   );

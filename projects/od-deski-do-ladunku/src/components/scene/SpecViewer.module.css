@@ -5,6 +5,8 @@
 }
 
 .canvasWrap {
+  /* The drag gesture belongs to the model, not to the page scroll. */
+  touch-action: none;
   position: relative;
   aspect-ratio: 16 / 11;
   border: 1px solid var(--line);
@@ -125,4 +127,13 @@
     aspect-ratio: auto;
     min-height: 30rem;
   }
+}
+
+.panelHint {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-top: 0.9rem;
 }

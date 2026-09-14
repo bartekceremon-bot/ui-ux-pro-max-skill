@@ -5,7 +5,7 @@ import { MobileFallback } from './MobileFallback';
 import { useActiveBeat } from './useActiveBeat';
 import { BEATS } from './journeyConfig';
 import { setScrollProgress, subscribeScroll } from './scrollStore';
-import { useCanRender3D, useReducedMotion } from '../../hooks/usePreferences';
+import { useReducedMotion, useSceneTier } from '../../hooks/usePreferences';
 import styles from './ScrollJourney.module.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -25,14 +25,15 @@ function Hero({ overlay }: { overlay: boolean }): JSX.Element {
         do ładunku.
       </h1>
       <p className={styles.heroLede}>
-        Produkujemy palety stworzone do transportu, magazynowania i codziennej pracy.
+        Palety drewniane projektowane i produkowane z myślą o transporcie, magazynowaniu i realnych
+        wymaganiach przemysłu.
       </p>
       <div className={styles.heroActions}>
-        <a href="#proces" className="btn btn-primary">
-          Zobacz proces
+        <a href="#produkty" className="btn btn-primary">
+          Poznaj nasze palety
         </a>
-        <a href="#produkty" className="btn btn-ghost">
-          Poznaj ofertę
+        <a href="#kontakt" className="btn btn-ghost">
+          Zapytaj o wycenę
         </a>
       </div>
     </div>
@@ -44,8 +45,11 @@ export function ScrollJourney(): JSX.Element {
   const stickyRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const captionRef = useRef<HTMLDivElement>(null);
-  const can3D = useCanRender3D();
+  const tier = useSceneTier();
+  // Reduced motion turns the scroll film off entirely: the reader gets the finished pallet and
+  // the full story as flat panels, per the brief, rather than a scrubbed animation at 0 duration.
   const reducedMotion = useReducedMotion();
+  const can3D = tier !== 'none' && !reducedMotion;
   const beat = useActiveBeat();
   const beatIndex = Math.max(0, BEATS.findIndex((item) => item.id === beat.id));
   const [progress, setProgress] = useState(0);
@@ -58,11 +62,11 @@ export function ScrollJourney(): JSX.Element {
       trigger: element,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: reducedMotion ? true : 0.35,
+      scrub: 0.35,
       onUpdate: (self) => setScrollProgress(self.progress),
     });
     return () => trigger.kill();
-  }, [reducedMotion, can3D]);
+  }, [can3D]);
 
   useEffect(() => subscribeScroll((t) => setProgress(Math.round(t * 100))), []);
 
@@ -106,10 +110,15 @@ export function ScrollJourney(): JSX.Element {
   }
 
   return (
-    <section id="proces-3d" className={styles.wrapper} ref={wrapperRef} aria-label="Proces: od deski do ładunku">
+    <section
+      id="proces-3d"
+      className={tier === 'light' ? `${styles.wrapper} ${styles.wrapperShort}` : styles.wrapper}
+      ref={wrapperRef}
+      aria-label="Proces: od deski do ładunku"
+    >
       <div className={styles.sticky} ref={stickyRef}>
         <Suspense fallback={<div className={styles.loading} aria-hidden="true" />}>
-          <JourneyCanvas active={active} />
+          <JourneyCanvas active={active} tier={tier} />
         </Suspense>
 
         <div className={styles.overlay}>
@@ -144,6 +153,17 @@ export function ScrollJourney(): JSX.Element {
                     <li key={chip}>{chip}</li>
                   ))}
                 </ul>
+              )}
+              {/* The story ends on an action: the last shot carries the offer, not just a picture. */}
+              {beat.cta && (
+                <div className={styles.captionActions}>
+                  <a href="#kontakt" className="btn btn-primary">
+                    Zapytaj o wycenę
+                  </a>
+                  <a href="#produkty" className="btn btn-ghost">
+                    Poznaj nasze palety
+                  </a>
+                </div>
               )}
             </div>
           </div>

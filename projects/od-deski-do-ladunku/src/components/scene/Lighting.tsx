@@ -23,15 +23,19 @@ function gradientSky(zenith: string, horizon: string): THREE.CanvasTexture {
  * a pallet is a matte wooden object, and at the preset's own environment intensity the grain
  * disappears. Panel geometry, angles and the key:fill ratio are the rig's.
  */
+import type { SceneTier } from '../../hooks/usePreferences';
+
 type LightingProps = {
   /**
    * Whether to paint the gradient sky and fog. A product shot on a page section wants the
    * section's own background behind it, not a second horizon inside a rectangle.
    */
   backdrop?: boolean;
+  /** Tablets get half the shadow resolution: the same lighting, a quarter of the shadow cost. */
+  tier?: SceneTier;
 };
 
-export function Lighting({ backdrop = true }: LightingProps): JSX.Element | null {
+export function Lighting({ backdrop = true, tier = 'full' }: LightingProps): JSX.Element | null {
   const { scene, gl } = useThree();
 
   useEffect(() => {
@@ -44,7 +48,7 @@ export function Lighting({ backdrop = true }: LightingProps): JSX.Element | null
       key: { color: '#fff8f0', intensity: 12.5, width: 1.6, height: 2.2, elevationDeg: 38, azimuthDeg: 315 },
       fill: { color: '#e8f0ff', intensity: 6.2, width: 2.4, height: 1.4, elevationDeg: 14, azimuthDeg: 65 },
       rim: { color: '#ffffff', intensity: 11, width: 0.5, height: 1.8, elevationDeg: 28, azimuthDeg: 168 },
-      contact: { color: '#ffffff', intensity: 1.1, mapSize: 1024, bias: -0.0002, normalBias: 0.02, extent: 4 },
+      contact: { color: '#ffffff', intensity: 1.1, mapSize: tier === 'light' ? 512 : 1024, bias: -0.0002, normalBias: 0.02, extent: 4 },
     });
 
     const sky = backdrop ? gradientSky('#1b1a17', '#3b352e') : null;
@@ -60,7 +64,7 @@ export function Lighting({ backdrop = true }: LightingProps): JSX.Element | null
       scene.fog = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [tier]);
 
   return null;
 }

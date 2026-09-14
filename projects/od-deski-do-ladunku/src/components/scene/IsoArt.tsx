@@ -184,6 +184,18 @@ const SCENES: Record<string, Box[]> = {
     ...stringers(),
     ...deckBoards((i) => [0, 1.6, 3.4, 5.4, 7.6][i]),
   ],
+  // A close read of the joint: two deck boards over a stringer and its block.
+  detal: [
+    { x: 0, y: 0, z: 0, w: DECK_L, h: BOARD_T, d: BLOCK, tone: 'woodMid' },
+    { x: 2, y: BOARD_T, z: 0, w: BLOCK, h: BLOCK_H, d: BLOCK, tone: 'woodDark' },
+    { x: 8.5, y: BOARD_T, z: 0, w: BLOCK, h: BLOCK_H, d: BLOCK, tone: 'woodDark' },
+    { x: 0, y: BOARD_T + BLOCK_H, z: 0, w: DECK_L, h: BOARD_T, d: BLOCK, tone: 'woodMid' },
+    { x: 0.5, y: TOP_Y, z: -2.2, w: 1.6, h: BOARD_T, d: 5, tone: 'wood' },
+    { x: 4, y: TOP_Y, z: -2.2, w: 1.6, h: BOARD_T, d: 5, tone: 'wood' },
+    { x: 7.5, y: TOP_Y, z: -2.2, w: 1.6, h: BOARD_T, d: 5, tone: 'wood' },
+  ],
+  // The deck pattern on its own: the geometry shot, without the structure under it.
+  geometria: [...bottomBoards(), ...deckBoards()],
   paleta: [...bottomBoards(), ...blocks(), ...stringers(), ...deckBoards()],
   towar: [...bottomBoards(), ...blocks(), ...stringers(), ...deckBoards(), ...cartons(2)],
   ladunek: [
@@ -197,6 +209,9 @@ const SCENES: Record<string, Box[]> = {
     { x: -0.2, y: TOP_Y + BOARD_T, z: -0.2, w: 12.4, h: 9.2, d: 8.4, tone: 'film' },
   ],
 };
+
+// The closing frame is the same subject as the load beat, held one shot longer.
+SCENES.transport = SCENES.ladunek;
 
 /** Painter's algorithm: far boxes first, so nothing needs a z-buffer. */
 function depth(box: Box): number {

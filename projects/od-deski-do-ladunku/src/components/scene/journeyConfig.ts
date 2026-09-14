@@ -6,43 +6,62 @@ export type Beat = {
   line: string;
   /** Small chips shown next to the line, e.g. part names in the components scene. */
   chips?: string[];
+  /** The closing frame carries the offer, so the story ends on an action rather than a picture. */
+  cta?: boolean;
 };
 
 /**
  * The scroll timeline, kept in one table so copy and 3D can never drift apart.
  *
- * The story opens on the exploded pallet rather than on raw timber: that suspended part diagram
- * is the page's poster image, and it states the brief's first rule -- every element is its own
- * object -- in the first frame. The material chapter that used to run in front of it now has its
- * own section, where a reader can actually stop and read it.
+ * Eight shots, matching the brief's camera narration: the exploded pallet, the assembly, a close
+ * detail of the timber and the joint, the deck read from above, the finished pallet, the load
+ * going on, the wrapped load leaving, and the closing frame that carries the offer. Each beat
+ * owns one camera move and one idea; nothing changes direction inside a beat.
  */
 export const BEATS: Beat[] = [
   {
     id: 'elementy',
     start: 0,
-    end: 0.2,
+    end: 0.14,
     kicker: '01 — Elementy',
     line: 'Każdy element ma swoją funkcję.',
     chips: ['Deski górne', 'Wsporniki nośne', 'Klocki', 'Deski dolne'],
   },
-  { id: 'montaz', start: 0.2, end: 0.42, kicker: '02 — Montaż', line: 'Paleta powstaje element po elemencie.' },
+  { id: 'montaz', start: 0.14, end: 0.34, kicker: '02 — Montaż', line: 'Paleta powstaje element po elemencie.' },
+  {
+    id: 'detal',
+    start: 0.34,
+    end: 0.46,
+    kicker: '03 — Detal',
+    line: 'Drewno, połączenie, gwóźdź.',
+    chips: ['Struktura drewna', 'Zbijanie', 'Kontrola połączeń'],
+  },
+  { id: 'geometria', start: 0.46, end: 0.55, kicker: '04 — Geometria', line: 'Układ pokładu widziany z góry.' },
   {
     id: 'paleta',
-    start: 0.42,
-    end: 0.56,
-    kicker: '03 — Gotowa paleta',
+    start: 0.55,
+    end: 0.66,
+    kicker: '05 — Gotowa paleta',
     line: 'Gotowa do pracy.',
     chips: ['Wymiary [WYMIAR]', 'Nośność [NOŚNOŚĆ]', 'Waga [WAGA]'],
   },
   {
     id: 'towar',
-    start: 0.56,
+    start: 0.66,
     end: 0.8,
-    kicker: '04 — Towar',
+    kicker: '06 — Towar',
     line: 'Ładunek układany warstwa po warstwie.',
     chips: ['Układ kolumnowy', 'Pełne podparcie', 'Bez nawisu'],
   },
-  { id: 'ladunek', start: 0.8, end: 1.0001, kicker: '05 — Ładunek', line: 'Paleta. Ładunek. Gotowe do drogi.' },
+  { id: 'ladunek', start: 0.8, end: 0.92, kicker: '07 — Ładunek', line: 'Folia, widły, transport.' },
+  {
+    id: 'transport',
+    start: 0.92,
+    end: 1.0001,
+    kicker: '08 — Gotowe',
+    line: 'Paleta gotowa do drogi.',
+    cta: true,
+  },
 ];
 
 export function beatAt(t: number): Beat {
@@ -76,11 +95,11 @@ export function phasesAt(t: number): Phases {
     // Boards and components open already spawned: the first frame is the exploded diagram.
     boards: 1,
     components: 1,
-    assembly: span(t, 0.2, 0.44),
-    cartons: span(t, 0.56, 0.78),
-    film: span(t, 0.78, 0.855),
-    approach: span(t, 0.83, 0.92),
-    lift: span(t, 0.92, 1),
+    assembly: span(t, 0.14, 0.36),
+    cartons: span(t, 0.66, 0.81),
+    film: span(t, 0.8, 0.865),
+    approach: span(t, 0.845, 0.925),
+    lift: span(t, 0.925, 0.985),
   };
 }
 
@@ -103,17 +122,25 @@ export type CameraKey = {
  * direction changes inside a beat.
  */
 export const CAMERA_PATH: CameraKey[] = [
-  // The exploded diagram is roughly two metres across, so the opening frame stands well back;
-  // the camera only closes in once the parts have collapsed into a 1.2 m pallet.
+  // 01 exploded — the pallet stands well back, panned right so the headline has clean space
   { t: 0.0, position: [2.85, 1.78, 3.55], target: [0, 0.3, 0], fov: 25, shift: -0.45 },
   { t: 0.14, position: [2.5, 1.5, 3.1], target: [0, 0.22, 0], fov: 27, shift: -0.2 },
-  { t: 0.26, position: [2.35, 1.55, 2.5], target: [0, 0.14, 0], fov: 31 },
-  { t: 0.38, position: [2.0, 0.98, 2.0], target: [0, 0.12, 0], fov: 31 },
-  { t: 0.48, position: [1.46, 0.46, 1.5], target: [0, 0.1, 0], fov: 31 },
-  { t: 0.58, position: [-1.72, 0.74, 1.82], target: [0, 0.13, 0], fov: 33 },
-  { t: 0.74, position: [-1.6, 1.52, 2.62], target: [0, 0.46, 0], fov: 34 },
-  { t: 0.88, position: [0.3, 1.72, 3.85], target: [0.05, 0.56, 0], fov: 30 },
-  { t: 1.0, position: [2.2, 1.9, 5.05], target: [0.5, 0.62, 0], fov: 27 },
+  // 02 assembly — closing in as the parts land
+  { t: 0.26, position: [2.15, 1.24, 2.45], target: [0, 0.16, 0], fov: 29 },
+  { t: 0.36, position: [1.5, 0.52, 1.58], target: [0, 0.11, 0], fov: 30 },
+  // 03 detail — inside the deck: grain, the joint, the nail heads
+  { t: 0.44, position: [0.46, 0.29, 0.52], target: [0.02, 0.12, 0.0], fov: 34 },
+  // 04 geometry — nearly overhead, so the deck pattern reads as a drawing
+  { t: 0.52, position: [0.36, 2.45, 0.62], target: [0, 0.09, 0], fov: 32 },
+  // 05 the finished pallet, held for a beat
+  { t: 0.6, position: [1.5, 0.6, 1.62], target: [0, 0.1, 0], fov: 30 },
+  // 06 the load goes on
+  { t: 0.72, position: [-1.72, 0.92, 1.92], target: [0, 0.22, 0], fov: 33 },
+  { t: 0.84, position: [-1.6, 1.5, 2.62], target: [0, 0.46, 0], fov: 34 },
+  // 07 wrapped and lifted
+  { t: 0.93, position: [0.3, 1.72, 3.85], target: [0.05, 0.56, 0], fov: 30 },
+  // 08 closing frame — subject right, room on the left for the offer
+  { t: 1.0, position: [2.45, 2.0, 5.2], target: [0.5, 0.62, 0], fov: 27, shift: -0.3 },
 ];
 function smoothstep(x: number) {
   const c = Math.min(1, Math.max(0, x));

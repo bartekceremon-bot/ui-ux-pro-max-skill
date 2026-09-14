@@ -1017,9 +1017,29 @@
 }
 
 .offerNote {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
   font-size: 0.92rem;
   color: var(--text-dim);
   max-width: 60ch;
+}
+
+/* Every product gets its own way into the enquiry, not just the section. */
+.offerNoteLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--gold);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s ease;
+}
+
+.offerNoteLink:hover {
+  border-bottom-color: var(--gold);
 }
 
 @media (min-width: 900px) {

@@ -2,13 +2,16 @@ import { Suspense, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { JourneyScene } from './JourneyScene';
+import type { SceneTier } from '../../hooks/usePreferences';
 
 type Props = {
   /** The scene only renders while the pinned section is on screen. */
   active: boolean;
+  /** 'light' is the tablet budget: fewer pixels per frame and a simpler set. */
+  tier: SceneTier;
 };
 
-export function JourneyCanvas({ active }: Props): JSX.Element {
+export function JourneyCanvas({ active, tier }: Props): JSX.Element {
   const [lost, setLost] = useState(false);
 
   if (lost) {
@@ -24,7 +27,7 @@ export function JourneyCanvas({ active }: Props): JSX.Element {
   return (
     <Canvas
       shadows
-      dpr={[1, 1.75]}
+      dpr={tier === 'light' ? [1, 1.25] : [1, 1.75]}
       frameloop={active ? 'always' : 'never'}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
       camera={{ position: [0.62, 0.3, 0.92], fov: 34, near: 0.05, far: 60 }}
@@ -38,7 +41,7 @@ export function JourneyCanvas({ active }: Props): JSX.Element {
       }}
     >
       <Suspense fallback={null}>
-        <JourneyScene />
+        <JourneyScene tier={tier} />
       </Suspense>
     </Canvas>
   );

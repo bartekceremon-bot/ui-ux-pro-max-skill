@@ -47,7 +47,7 @@ export function Contact(): JSX.Element {
       <div className={`container ${styles.contactGrid}`} ref={ref}>
         <div className="reveal">
           <p className="eyebrow">Kontakt</p>
-          <h2 className={styles.contactHeading}>Potrzebujesz palet do swojego transportu?</h2>
+          <h2 className={styles.contactHeading}>Potrzebujesz palet pod swój ładunek?</h2>
           <p className={`lede ${styles.contactLede}`}>
             Podaj wymiary ładunku i sposób transportu — dobierzemy typ palety i przygotujemy wycenę.
           </p>

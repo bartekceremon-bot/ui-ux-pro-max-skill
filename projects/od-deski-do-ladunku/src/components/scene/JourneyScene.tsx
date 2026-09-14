@@ -9,6 +9,7 @@ import { buildLoad } from './builders/load';
 import { buildForklift } from './builders/forklift';
 import { phasesAt, sampleCamera } from './journeyConfig';
 import { scrollState } from './scrollStore';
+import type { SceneTier } from '../../hooks/usePreferences';
 
 /** Eased 0..1 ramp between two scroll positions. */
 function smooth(t: number, from: number, to: number) {
@@ -21,7 +22,7 @@ function smooth(t: number, from: number, to: number) {
  * boards become a pallet, the pallet takes a load, and the load leaves on a truck. Nothing here
  * decides *when* — journeyConfig owns the timing, this owns the wiring.
  */
-export function JourneyScene(): JSX.Element {
+export function JourneyScene({ tier }: { tier: SceneTier }): JSX.Element {
   const { camera } = useThree();
   const root = useRef<THREE.Group>(null);
 
@@ -105,7 +106,7 @@ export function JourneyScene(): JSX.Element {
 
   return (
     <>
-      <Lighting />
+      <Lighting tier={tier} />
       <group ref={root} />
     </>
   );

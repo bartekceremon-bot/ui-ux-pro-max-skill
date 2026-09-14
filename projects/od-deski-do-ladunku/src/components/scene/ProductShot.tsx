@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Lighting } from './Lighting';
+import { useReducedMotion } from '../../hooks/usePreferences';
 import { createMaterials } from './builders/materials';
 import { buildPallet } from './builders/pallet';
 import { buildStudio } from './builders/studio';
@@ -30,6 +31,7 @@ function Scene({ variant, subject }: { variant: ShotVariant; subject: ShotSubjec
   const { camera, invalidate } = useThree();
   const root = useRef<THREE.Group>(null);
   const spin = useRef(0);
+  const reducedMotion = useReducedMotion();
 
   const materials = useMemo(() => createMaterials(), []);
   const studio = useMemo(() => buildStudio(materials), [materials]);
@@ -67,9 +69,10 @@ function Scene({ variant, subject }: { variant: ShotVariant; subject: ShotSubjec
       mesh.scale.y = scale;
       mesh.position.y = part.rest[1] + (part.size[1] * (scale - 1)) / 2;
     }
-    spin.current = 0;
+    // Under reduced motion the product simply appears in its new state; no turn-in.
+    spin.current = reducedMotion ? 1 : 0;
     invalidate();
-  }, [variant, pallet, invalidate]);
+  }, [variant, pallet, invalidate, reducedMotion]);
 
   // A short settle after every change: the product turns a few degrees into its new pose instead
   // of snapping, which is what makes the switch read as the same object rather than a new image.
