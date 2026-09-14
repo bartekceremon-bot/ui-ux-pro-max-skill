@@ -1,0 +1,83 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/settings.gd" id="1_settings"]
+
+[node name="Settings" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settings")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.027, 0.07, 0.86)
+
+[node name="Panel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 42.0
+offset_top = 220.0
+offset_right = -42.0
+offset_bottom = -220.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Col" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Panel/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "SETTINGS"
+horizontal_alignment = 1
+
+[node name="Music" type="Button" parent="Panel/Col"]
+unique_name_in_owner = true
+toggle_mode = true
+layout_mode = 2
+text = "MUSIC"
+
+[node name="SfxBtn" type="Button" parent="Panel/Col"]
+unique_name_in_owner = true
+toggle_mode = true
+layout_mode = 2
+text = "SOUND"
+
+[node name="Haptics" type="Button" parent="Panel/Col"]
+unique_name_in_owner = true
+toggle_mode = true
+layout_mode = 2
+text = "VIBRATION"
+
+[node name="Reduced" type="Button" parent="Panel/Col"]
+unique_name_in_owner = true
+toggle_mode = true
+layout_mode = 2
+text = "REDUCED EFFECTS"
+
+[node name="Note" type="Label" parent="Panel/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Reduced effects drops trails, grid and glow layers. Turn it on for older phones or longer battery life."
+
+[node name="Gap" type="Control" parent="Panel/Col"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Back" type="Button" parent="Panel/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "BACK"

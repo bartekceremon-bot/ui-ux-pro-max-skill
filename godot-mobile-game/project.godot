@@ -1,0 +1,41 @@
+; Engine configuration file.
+; Prism Run - portrait, one-thumb arcade game.
+
+config_version=5
+
+[application]
+
+config/name="Prism Run"
+config/description="One-thumb neon arcade built for phones."
+config/version="1.0.0"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.027451, 0.039216, 0.094118, 1)
+boot_splash/show_image=false
+
+[autoload]
+
+SaveData="*res://scripts/save_data.gd"
+Sfx="*res://scripts/audio.gd"
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/window_width_override=450
+window/size/window_height_override=800
+window/handheld/orientation=1
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/msaa_2d=1

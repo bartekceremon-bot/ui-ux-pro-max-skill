@@ -1,0 +1,7 @@
+# Godot
+.godot/
+*.translation
+
+# Export output (APK/AAB artifacts are published as releases, not committed)
+build/
+android/

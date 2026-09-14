@@ -1,0 +1,114 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/menu.gd" id="1_menu"]
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Margin" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Col" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TopSpace" type="Control" parent="Margin/Col"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Title" type="Label" parent="Margin/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "PRISM RUN"
+horizontal_alignment = 1
+
+[node name="Tagline" type="Label" parent="Margin/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Match the colour. Take the gate."
+horizontal_alignment = 1
+
+[node name="Best" type="Label" parent="Margin/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "BEST 0"
+horizontal_alignment = 1
+
+[node name="MidSpace" type="Control" parent="Margin/Col"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Play" type="Button" parent="Margin/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "PLAY"
+
+[node name="Row" type="HBoxContainer" parent="Margin/Col"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="HowTo" type="Button" parent="Margin/Col/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "HOW TO PLAY"
+
+[node name="Settings" type="Button" parent="Margin/Col/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SETTINGS"
+
+[node name="Stats" type="Label" parent="Margin/Col"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+
+[node name="Help" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 200.0
+offset_right = -40.0
+offset_bottom = -200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HelpCol" type="VBoxContainer" parent="Help"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="HelpTitle" type="Label" parent="Help/HelpCol"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "HOW TO PLAY"
+horizontal_alignment = 1
+
+[node name="HelpBody" type="Label" parent="Help/HelpCol"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 3
+text = ""
+
+[node name="HelpClose" type="Button" parent="Help/HelpCol"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "GOT IT"
