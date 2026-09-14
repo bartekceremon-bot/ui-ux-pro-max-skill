@@ -1,0 +1,1660 @@
+<title>Aleja Pixel City</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============================================================
+   ALEJA PIXEL CITY
+   Jedna długa aleja. Budujesz ją za PXT, a PXT zarabiasz
+   biegnąc przez nią bobrem i zbierając czynsz z budynków.
+   Świat jest celowo jednomotywowy: nocny ekran arcade.
+   ============================================================ */
+:root{
+  --ink:#0b0f12; --ink2:#070a0c; --panel:#121a1f; --panel2:#1a242b; --line:#26333b;
+  --text:#e8f1ec; --dim:#7f9490; --faint:#556663;
+  --lime:#c9f24d; --amber:#ffb84d; --rose:#ff6b6b; --teal:#3fd1a8; --violet:#9d7bff;
+  --lime-ink:#0f1a04;
+  --r:3px;
+  --dur:.22s;
+  --ease:cubic-bezier(.2,.8,.3,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);color:var(--text);
+  font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.45;
+  font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+canvas{display:block;touch-action:none;image-rendering:pixelated}
+#view{position:fixed;inset:0;z-index:1}
+.px{font-family:Silkscreen,"IBM Plex Mono",monospace;letter-spacing:.02em}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- pasek górny ---------- */
+#hud{position:fixed;top:0;left:0;right:0;z-index:12;display:flex;align-items:stretch;gap:0;
+  padding:0 8px;height:58px;background:linear-gradient(180deg,#0b0f12f2,#0b0f12c4);
+  border-bottom:2px solid var(--line);overflow-x:auto;scrollbar-width:none;
+  transform:translateY(-100%);transition:transform .5s var(--ease)}
+#hud::-webkit-scrollbar{display:none}
+#hud.in{transform:none}
+.stat{display:flex;flex-direction:column;justify-content:center;padding:0 11px;
+  border-right:1px solid #1d272d;white-space:nowrap}
+.stat i{font-style:normal;font-size:8px;color:var(--dim);letter-spacing:.14em}
+.stat b{font-size:14px;font-weight:600}
+.stat.hero b{color:var(--lime);font-size:16px}
+.stat.rate b{color:var(--teal)}
+#hTime{color:var(--amber)}
+#rank{margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 4px 0 12px;white-space:nowrap}
+#rankBar{width:74px;height:6px;background:#1d272d;border:1px solid var(--line);overflow:hidden}
+#rankFill{height:100%;width:0;background:var(--lime);transition:width .6s var(--ease)}
+#rankName{font-size:10px;color:var(--dim);letter-spacing:.1em}
+
+/* ---------- lewa szyna ---------- */
+.rail{position:fixed;left:8px;top:74px;z-index:12;display:flex;flex-direction:column;
+  background:#0f151ae8;border:2px solid var(--line);backdrop-filter:blur(3px);
+  transform:translateX(-140%);transition:transform .5s var(--ease) .1s}
+.rail.in{transform:none}
+.rail button{width:42px;height:42px;font-size:15px;border-bottom:1px solid #1d272d;
+  position:relative;transition:background var(--dur),color var(--dur)}
+.rail button:last-child{border-bottom:0}
+.rail button:hover,.rail button:focus-visible{background:#1c262d;color:var(--lime)}
+.rail button.key{font-family:Silkscreen,monospace;font-size:9px;color:var(--lime)}
+.rail button .dot{position:absolute;top:5px;right:5px;width:6px;height:6px;background:var(--amber)}
+#zoom{position:fixed;right:8px;top:74px;z-index:12;display:flex;flex-direction:column;
+  background:#0f151ae8;border:2px solid var(--line);
+  transform:translateX(140%);transition:transform .5s var(--ease) .1s}
+#zoom.in{transform:none}
+#zoom button{width:42px;height:42px;font-size:17px;border-bottom:1px solid #1d272d}
+#zoom button:last-child{border-bottom:0}
+#zoom button:hover{background:#1c262d;color:var(--lime)}
+
+/* ---------- dolny dok ---------- */
+#dock{position:fixed;left:0;right:0;bottom:0;z-index:11;background:#0b0f12f5;
+  border-top:2px solid var(--line);
+  transform:translateY(110%);transition:transform .55s var(--ease) .16s}
+#dock.in{transform:none}
+#panel{max-height:min(46vh,380px);overflow-y:auto;display:none;border-bottom:1px solid var(--line)}
+#panel.open{display:block;animation:slideUp .3s var(--ease)}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#ticker{height:26px;background:var(--lime);color:var(--lime-ink);font-size:11px;font-weight:600;
+  overflow:hidden;position:relative;display:flex;align-items:center}
+#tickerTrack{display:inline-block;white-space:nowrap;padding-left:100%;
+  animation:marq 26s linear infinite}
+@keyframes marq{to{transform:translateX(-100%)}}
+#cta{display:flex;gap:7px;padding:8px}
+.big{flex:1;padding:13px 10px;background:var(--lime);color:var(--lime-ink);font-weight:700;
+  text-align:center;font-family:Silkscreen,monospace;font-size:11px;letter-spacing:.06em;
+  transition:transform .12s var(--ease),filter var(--dur);border:2px solid #a9cf39}
+.big:hover{filter:brightness(1.08)}
+.big:active{transform:translateY(2px)}
+.big.pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #c9f24d00}50%{box-shadow:0 0 0 5px #c9f24d22}}
+.ghost{padding:13px 13px;border:2px solid var(--line);background:var(--panel2);
+  font-family:Silkscreen,monospace;font-size:10px;transition:border-color var(--dur),color var(--dur)}
+.ghost:hover{border-color:var(--lime);color:var(--lime)}
+
+/* ---------- panele listowe ---------- */
+.ptitle{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:#0d1317;z-index:2}
+.ptitle h4{margin:0;font-family:Silkscreen,monospace;font-size:11px;color:var(--lime);letter-spacing:.06em}
+.ptitle .x{margin-left:auto;padding:3px 9px;border:1px solid var(--line);font-size:10px}
+.row{display:flex;align-items:center;gap:10px;padding:8px 11px;border-bottom:1px solid #182026;
+  animation:rowIn .3s var(--ease) both}
+@keyframes rowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.row:hover{background:#111a1f}
+.row .idx{color:var(--lime);font-size:9px;border:1px solid var(--line);padding:2px 5px;min-width:38px;text-align:center}
+.row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .nm small{display:block;color:var(--dim);font-size:10px}
+.row .amt{color:var(--lime);white-space:nowrap;font-size:12px}
+.swatch{width:26px;height:26px;flex:0 0 auto;border:1px solid #0006}
+
+/* ---------- modal ---------- */
+#modal{position:fixed;inset:0;background:#05080ad9;z-index:30;display:none;
+  align-items:center;justify-content:center;padding:12px}
+#modal.open{display:flex;animation:fade .2s var(--ease)}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.box{width:min(430px,96vw);max-height:92vh;overflow-y:auto;background:var(--panel);
+  border:2px solid var(--line);padding:14px;animation:boxIn .34s var(--ease)}
+@keyframes boxIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+.box h3{margin:0 0 4px;font-family:Silkscreen,monospace;font-size:14px;color:var(--lime);letter-spacing:.04em}
+.box .sub{margin:0 0 12px;color:var(--dim);font-size:11px}
+label{display:block;font-size:10px;color:var(--dim);letter-spacing:.09em;margin-top:8px}
+input,select,textarea{width:100%;padding:9px;margin:4px 0 2px;background:#0a1013;color:var(--text);
+  border:2px solid var(--line);outline:none;transition:border-color var(--dur)}
+input:focus,select:focus,textarea:focus{border-color:var(--lime)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:12px;color:var(--dim);
+  border-bottom:1px dotted #1e2a30}
+.kv b{color:var(--text);font-weight:500}
+.kv b.good{color:var(--lime)} .kv b.bad{color:var(--rose)}
+.tiers{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 4px}
+.tier{border:2px solid var(--line);padding:8px;cursor:pointer;background:#0e1519;
+  transition:border-color var(--dur),background var(--dur),transform .12s var(--ease)}
+.tier:hover{transform:translateY(-2px)}
+.tier.sel{border-color:var(--lime);background:#18230d}
+.tier.no{opacity:.42;cursor:not-allowed}
+.tier b{display:block;color:var(--lime);font-family:Silkscreen,monospace;font-size:10px}
+.tier span{font-size:10px;color:var(--dim)}
+.btn{display:block;width:100%;padding:11px;border:2px solid var(--line);background:var(--panel2);
+  margin-top:7px;text-align:center;transition:border-color var(--dur),transform .12s var(--ease)}
+.btn:hover{border-color:var(--dim)}
+.btn:active{transform:translateY(2px)}
+.btn.go{background:var(--lime);color:var(--lime-ink);border-color:#a9cf39;font-weight:700;
+  font-family:Silkscreen,monospace;font-size:11px}
+.btn.go[disabled]{background:#26301c;color:#6b7a5a;border-color:#2d3a24;cursor:not-allowed}
+.btn.warn{border-color:var(--rose);color:var(--rose)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tiny{font-size:10px;color:var(--faint);line-height:1.6;margin:8px 0 0}
+.badge{font-size:9px;padding:2px 6px;border:1px solid var(--line);color:var(--dim);letter-spacing:.08em}
+.badge.ok{color:var(--lime);border-color:var(--lime)}
+.badge.hot{color:var(--amber);border-color:var(--amber)}
+.upg{display:flex;gap:9px;align-items:flex-start;border:2px solid var(--line);padding:9px;
+  margin-top:7px;background:#0e1519;transition:border-color var(--dur)}
+.upg.own{border-color:var(--teal)}
+.upg .ic{font-size:17px;line-height:1}
+.upg .t{flex:1}
+.upg .t b{display:block;font-size:12px}
+.upg .t span{font-size:10px;color:var(--dim)}
+.upg button{padding:7px 10px;border:2px solid var(--line);font-size:10px;white-space:nowrap}
+.upg button:hover:not([disabled]){border-color:var(--lime);color:var(--lime)}
+.upg button[disabled]{opacity:.4;cursor:not-allowed}
+
+/* ---------- pasek biegu ---------- */
+#run{position:fixed;top:66px;left:50%;transform:translateX(-50%) translateY(-24px);z-index:14;
+  display:none;align-items:center;gap:11px;padding:7px 11px;background:#0f151af2;
+  border:2px solid var(--lime);opacity:0;transition:opacity .3s,transform .3s var(--ease)}
+#run.in{opacity:1;transform:translateX(-50%)}
+#run b{font-family:Silkscreen,monospace;font-size:15px;color:var(--lime)}
+#run span{font-size:11px;white-space:nowrap}
+#combo{color:var(--amber);font-weight:600}
+#combo.hot{animation:comboPop .4s var(--ease)}
+@keyframes comboPop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+#run button{padding:4px 8px;border:2px solid var(--line);font-size:9px}
+
+/* ---------- toasty ---------- */
+#toasts{position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:26;
+  width:min(330px,90vw);display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:#141c21f7;border-left:4px solid var(--lime);padding:8px 11px;font-size:11.5px;
+  animation:tIn .3s var(--ease)}
+.toast.warn{border-color:var(--amber)} .toast.bad{border-color:var(--rose)}
+.toast.gain{border-color:var(--teal)}
+@keyframes tIn{from{opacity:0;transform:translateY(-10px) scale(.97)}to{opacity:1;transform:none}}
+.toast.out{animation:tOut .3s var(--ease) forwards}
+@keyframes tOut{to{opacity:0;transform:translateY(-8px)}}
+
+/* ---------- ekran startowy ---------- */
+#boot{position:fixed;inset:0;z-index:40;background:var(--ink2);display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:22px;text-align:center}
+#boot.gone{animation:bootOut .6s var(--ease) forwards;pointer-events:none}
+@keyframes bootOut{to{opacity:0;transform:scale(1.04)}}
+#boot h1{margin:0;font-family:Silkscreen,monospace;font-size:clamp(22px,7vw,40px);color:var(--lime);
+  letter-spacing:.04em;line-height:1.25;text-wrap:balance}
+#boot h1 em{font-style:normal;color:var(--text);display:block;font-size:.52em;margin-top:8px}
+#boot p{margin:0;max-width:34em;color:var(--dim);font-size:12px;line-height:1.7}
+#bootBar{width:min(260px,72vw);height:8px;border:2px solid var(--line);background:#0d1418}
+#bootFill{height:100%;width:0;background:var(--lime);transition:width .2s linear}
+#bootMsg{font-size:10px;color:var(--faint);letter-spacing:.12em;min-height:14px}
+#bootGo{display:none;padding:13px 26px;background:var(--lime);color:var(--lime-ink);
+  font-family:Silkscreen,monospace;font-size:13px;border:2px solid #a9cf39;letter-spacing:.06em}
+#bootGo.show{display:block;animation:boxIn .4s var(--ease)}
+#bootGo:active{transform:translateY(2px)}
+.skyline{display:flex;align-items:flex-end;gap:3px;height:52px}
+.skyline i{display:block;width:11px;background:#1d2a22;animation:rise .7s var(--ease) both}
+@keyframes rise{from{height:0!important;opacity:0}}
+
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important}
+  #tickerTrack{animation:none;padding-left:10px}
+}
+@media (max-width:520px){ .stat.opt{display:none} }
+@media (max-width:420px){
+  .stat{padding:0 8px}
+  .stat b{font-size:13px}
+  #rank{padding-left:8px}
+  #rankBar{width:52px}
+}
+</style>
+
+<canvas id="view"></canvas>
+
+<div id="hud">
+  <div class="stat hero"><i>PXT</i><b class="num" id="hTok">0</b></div>
+  <div class="stat rate"><i>CZYNSZ /S</i><b class="num" id="hRate">0,0</b></div>
+  <div class="stat"><i>BUDYNKI</i><b class="num" id="hCount">0</b></div>
+  <div class="stat opt"><i>ALEJA</i><b class="num" id="hLen">0 / 300</b></div>
+  <div class="stat opt"><i>REKORD BIEGU</i><b class="num" id="hBest">0</b></div>
+  <div class="stat"><i>PORA</i><b id="hTime">ŚWIT</b></div>
+  <div id="rank">
+    <div>
+      <div id="rankName" class="px">OSADNIK</div>
+      <div id="rankBar"><div id="rankFill"></div></div>
+    </div>
+  </div>
+</div>
+
+<nav class="rail" aria-label="Narzędzia">
+  <button id="rRun" class="key" title="Bieg bobra (R)">BIEG</button>
+  <button id="rShop" class="key" title="Ulepszenia (U)">ULEP</button>
+  <button id="rQuest" title="Kontrakty (K)">📋<span class="dot" id="qDot" hidden></span></button>
+  <button id="rBoard" title="Ranking (L)">🏆</button>
+  <button id="rFree" title="Skocz do wolnej działki (F)">📍</button>
+  <button id="rHelp" title="Jak grać (H)">?</button>
+</nav>
+
+<div id="zoom">
+  <button id="zin" title="Przybliż" aria-label="Przybliż">+</button>
+  <button id="zout" title="Oddal" aria-label="Oddal">−</button>
+</div>
+
+<div id="run" role="status">
+  <b class="num" id="rScore">0</b>
+  <span id="rJump">🚗 0</span>
+  <span id="combo">x1</span>
+  <span id="rCoins">0 PXT</span>
+  <button id="rExit">WYJŚCIE</button>
+</div>
+
+<div id="dock">
+  <div id="panel"></div>
+  <div id="ticker"><span id="tickerTrack">Aleja czeka na pierwszy budynek. Pobiegnij bobrem, zbierz PXT, postaw kiosk.</span></div>
+  <div id="cta">
+    <button class="big pulse" id="btnBuild">POSTAW BUDYNEK</button>
+    <button class="ghost" id="btnRun">BIEG</button>
+  </div>
+</div>
+
+<div id="toasts" aria-live="polite"></div>
+<div id="modal"><div class="box" id="box"></div></div>
+
+<div id="boot">
+  <div class="skyline" id="bootSky"></div>
+  <h1>ALEJA<em>PIXEL CITY</em></h1>
+  <p>Trzysta działek wzdłuż jednej alei. Biegniesz bobrem przez ruch uliczny, zbierasz PXT,
+     a potem stawiasz za nie budynki, które same zarabiają na kolejne.</p>
+  <div id="bootBar"><div id="bootFill"></div></div>
+  <div id="bootMsg" class="px">WYLEWANIE ASFALTU</div>
+  <button id="bootGo">WEJDŹ DO MIASTA</button>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   1. KONFIGURACJA I DANE
+   ============================================================ */
+const PLOTS = 300;
+const SOUTH_OFF = 1000;              // klucze działek po stronie parku
+const DAY_LEN = 190;                 // sekundy pełnej doby
+const SAVE_KEY = "aleja.pixel.city.v1";
+
+const TIERS = [
+  {k:"kiosk",  n:"Kiosk",     cost:60,   floors:3,  w:44, yield:0.12, ic:"🏪"},
+  {k:"shop",   n:"Sklep",     cost:150,  floors:6,  w:48, yield:0.34, ic:"🛍"},
+  {k:"office", n:"Biuro",     cost:320,  floors:11, w:52, yield:0.78, ic:"🏢"},
+  {k:"tower",  n:"Wieżowiec", cost:640,  floors:18, w:56, yield:1.7,  ic:"🏙"},
+  {k:"land",   n:"Landmark",  cost:1500, floors:28, w:64, yield:4.4,  ic:"🗼"}
+];
+const SOUTH_TIERS = [
+  {k:"truck",    n:"Food truck",   cost:50,  w:38, yield:0.1,  ic:"🚚", south:true},
+  {k:"stall",    n:"Stragan",      cost:100, w:40, yield:0.24, ic:"⛺", south:true},
+  {k:"garden",   n:"Ogródek",      cost:200, w:46, yield:0.52, ic:"🌳", south:true},
+  {k:"pavilion", n:"Pawilon",      cost:400, w:52, yield:1.1,  ic:"🎪", south:true},
+  {k:"arch",     n:"Neonowa brama",cost:800, w:58, yield:2.4,  ic:"🌈", south:true}
+];
+const ALL_TIERS = TIERS.concat(SOUTH_TIERS);
+const tierOf = k => ALL_TIERS.find(t => t.k === k) || TIERS[0];
+const isSouth = i => i >= SOUTH_OFF;
+const southIdx = i => i - SOUTH_OFF;
+const tiersFor = i => isSouth(i) ? SOUTH_TIERS : TIERS;
+const plotLabel = i => isSouth(i) ? "P" + southIdx(i) : "#" + i;
+
+const NEON_COST = 100, BILLBOARD_COST = 140;
+const DISTRICT = 25;                                   // działek w dzielnicy
+const DISTRICTS = ["Bramna","Portowa","Targowa","Stara","Rynek","Nowa","Fabryczna","Ogrodowa",
+                   "Północna","Kolejowa","Mostowa","Zielona"];
+const districtOf = p => Math.floor(p / DISTRICT);
+const districtName = p => DISTRICTS[districtOf(p) % DISTRICTS.length];
+
+/* Środek alei jest najdroższy i najbardziej dochodowy. */
+function locMult(i){
+  const p = isSouth(i) ? southIdx(i) : i;
+  const d = Math.abs(p - PLOTS / 2) / (PLOTS / 2);      // 0 w centrum, 1 na krańcach
+  return Math.round((0.62 + (1 - d) * 0.78) * 100) / 100;
+}
+
+const RANKS = [
+  {t:0,     n:"OSADNIK"}, {t:400,  n:"BRUKARZ"}, {t:1200, n:"BUDOWNICZY"},
+  {t:3000,  n:"DEWELOPER"}, {t:7000, n:"MAGNAT"}, {t:15000, n:"BURMISTRZ"},
+  {t:32000, n:"LEGENDA ALEI"}
+];
+
+const UPG = [
+  {k:"jump",   n:"Mocniejsze łapy", d:"Skok wyższy o jedną piątą.",              cost:150, ic:"🦵"},
+  {k:"double", n:"Podwójny skok",   d:"Drugi skok w powietrzu.",                 cost:400, ic:"🪶"},
+  {k:"helmet", n:"Kask",            d:"Jedno zderzenie na bieg bez końca gry.",  cost:350, ic:"🪖"},
+  {k:"magnet", n:"Magnes",          d:"Ściąga żetony z dużo większej odległości.",cost:300, ic:"🧲"},
+  {k:"boots",  n:"Buty sprinterskie",d:"Start szybszy, punkty rosną prędzej.",   cost:520, ic:"👟"},
+  {k:"pouch",  n:"Torba bobra",     d:"Limit żetonów na bieg rośnie z 25 do 60.",cost:600, ic:"🎒"},
+  {k:"vest",   n:"Kamizelka",       d:"Drugie zderzenie też wybaczone.",         cost:900, ic:"🦺"}
+];
+
+const OBST = [
+  {k:"cone",    w:.28, h:13, n:"pachołek",    slide:false},
+  {k:"bin",     w:.32, h:17, n:"kosz",        slide:false},
+  {k:"puddle",  w:.44, h:5,  n:"kałuża",      slide:false},
+  {k:"scooter", w:.34, h:14, n:"hulajnoga",   slide:false},
+  {k:"crate",   w:.30, h:16, n:"skrzynka",    slide:false},
+  {k:"hydrant", w:.24, h:12, n:"hydrant",     slide:false},
+  {k:"banner",  w:.40, h:0,  n:"baner",       slide:true,  low:14, top:100},
+  {k:"barrier", w:.34, h:0,  n:"barierka",    slide:true,  low:12, top:92}
+];
+const CARCOL = ["#e2705b","#6f9fc4","#d9c15b","#8fbf7a","#cfd6da","#b06fc4","#5e8f9e"];
+
+const QUEST_POOL = [
+  {k:"dist",  n:i=>`Przebiegnij ${i} działek w jednym biegu`, tgt:[60,110,170], pay:[90,190,340]},
+  {k:"coins", n:i=>`Zbierz ${i} PXT w jednym biegu`,          tgt:[18,32,50],   pay:[80,170,300]},
+  {k:"jump",  n:i=>`Przeskocz ${i} przeszkód w jednym biegu`, tgt:[14,26,40],   pay:[80,160,290]},
+  {k:"build", n:i=>`Postaw ${i} budynków`,                    tgt:[3,7,14],     pay:[120,260,520]},
+  {k:"neon",  n:i=>`Zapal ${i} neonów`,                       tgt:[2,5,9],      pay:[130,280,540]},
+  {k:"combo", n:i=>`Utrzymaj kombo x${i}`,                    tgt:[3,4,5],      pay:[110,240,460]}
+];
+
+/* ============================================================
+   2. STAN I ZAPIS
+   ============================================================ */
+const S = {
+  plots:{}, tokens:120, t:38, cam:{x:0,y:0,z:1},
+  ups:{}, best:0, totalEarned:0, builtCount:0, neonCount:0,
+  quests:[], weather:"clear", weatherT:40,
+  sel:null, panel:null, boot:false,
+  run:{on:false,dead:false,p:0,y:0,vy:0,slide:0,score:0,jumped:0,coins:0,combo:1,
+       comboRaw:0,shield:0,traffic:[],obst:[],pick:[],nextCar:0,nextObst:0,nextCoin:0,
+       flash:0,best:0,startedNight:false}
+};
+const claims = () => Object.values(S.plots);
+const coinCap = () => S.ups.pouch ? 60 : 25;
+
+function save(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      plots:S.plots, tokens:Math.round(S.tokens*100)/100, ups:S.ups, best:S.best,
+      totalEarned:Math.round(S.totalEarned), quests:S.quests, t:S.t,
+      builtCount:S.builtCount, neonCount:S.neonCount, when:Date.now()
+    }));
+  }catch(e){ /* tryb prywatny: gra działa, po prostu bez zapisu */ }
+}
+function load(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); }catch(e){}
+  if(!d) return false;
+  S.plots = d.plots || {};
+  S.tokens = d.tokens ?? 120;
+  S.ups = d.ups || {};
+  S.best = d.best || 0;
+  S.totalEarned = d.totalEarned || 0;
+  S.quests = d.quests || [];
+  S.builtCount = d.builtCount || 0;
+  S.neonCount = d.neonCount || 0;
+  S.t = d.t || 38;
+  /* czynsz zebrany, gdy gra była zamknięta, do dwóch godzin */
+  if(d.when){
+    const away = Math.min((Date.now() - d.when)/1000, 7200);
+    const off = rate() * away * 0.35;
+    if(off > 1){ S.tokens += off; S.offline = Math.round(off); }
+  }
+  return true;
+}
+
+/* ============================================================
+   3. EKONOMIA MIASTA
+   ============================================================ */
+/* Sąsiedztwo, dzielnica, neon i billboard mnożą bazowy czynsz. */
+function neighbourBonus(i){
+  const left = S.plots[i-1], right = S.plots[i+1];
+  return 1 + (left?0.08:0) + (right?0.08:0) + (left&&right?0.04:0);
+}
+function districtFill(d){
+  let have = 0;
+  for(let i = d*DISTRICT; i < (d+1)*DISTRICT; i++) if(S.plots[i]) have++;
+  return have / DISTRICT;
+}
+function districtBonus(i){
+  if(isSouth(i)) return 1;
+  return districtFill(districtOf(i)) >= 0.6 ? 1.15 : 1;
+}
+function plotYield(i, c){
+  const t = tierOf(c.tier);
+  let y = t.yield * locMult(i) * neighbourBonus(i) * districtBonus(i);
+  if(c.neon) y *= (nf() > 0.5 ? 1.3 : 1.05);
+  if(c.board) y *= 1.18;
+  return y;
+}
+function rate(){
+  let r = 0;
+  for(const k in S.plots) r += plotYield(+k, S.plots[k]);
+  return r;
+}
+function plotCost(i, tierKey){
+  return Math.round(tierOf(tierKey).cost * locMult(i));
+}
+function cityValue(){
+  let v = 0;
+  for(const k in S.plots) v += S.plots[k].spent || 0;
+  return v;
+}
+function rankOf(v){
+  let r = RANKS[0], next = RANKS[1];
+  for(let i=0;i<RANKS.length;i++){
+    if(v >= RANKS[i].t){ r = RANKS[i]; next = RANKS[i+1] || null; }
+  }
+  return {r, next};
+}
+
+/* ============================================================
+   4. GEOMETRIA ALEI (rzut skośny, jak w pierwotnej makiecie)
+   ============================================================ */
+const CELL = 72, SKEW = 13, ROWH = 26;
+const ROW = {BACK:-1, BUILD:0, WALK:1, ROAD1:2, ROAD2:3, ROAD3:4, WALK2:5, PARK1:6, PARK2:7, PARK3:8};
+const px = (x,y) => ({sx:(x*CELL + y*SKEW)*S.cam.z + S.cam.x, sy:(y*ROWH)*S.cam.z + S.cam.y});
+const plotAt = sx => Math.round(((sx - S.cam.x)/S.cam.z)/CELL);
+const hash = s => {let h=7; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0; return Math.abs(h);};
+const sh = (hex,f) => {
+  const n = parseInt(hex.slice(1),16);
+  const r = Math.min(255,Math.max(0,((n>>16)&255)*f))|0;
+  const g2 = Math.min(255,Math.max(0,((n>>8)&255)*f))|0;
+  const b = Math.min(255,Math.max(0,(n&255)*f))|0;
+  return "#"+((1<<24)+(r<<16)+(g2<<8)+b).toString(16).slice(1);
+};
+const FACADE = ["#7b8ea3","#8f7f6b","#6f8a7a","#9a7b86","#7d7f9c","#8c8f73","#a08472","#6e8899"];
+
+const cv = document.getElementById("view"), g = cv.getContext("2d");
+let W = 0, H = 0, DPR = 1;
+function resize(){
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W*DPR; cv.height = H*DPR;
+  cv.style.width = W+"px"; cv.style.height = H+"px";
+  g.setTransform(DPR,0,0,DPR,0,0);
+  g.imageSmoothingEnabled = false;
+  S.cam.y = Math.max(215, Math.min(H*0.44, H-320));
+  clampCam();
+}
+addEventListener("resize", resize);
+
+function clampCam(){
+  const z = S.cam.z;
+  const minX = W - (PLOTS+1)*CELL*z, maxX = 40;
+  S.cam.x = Math.min(maxX, Math.max(minX, S.cam.x));
+}
+
+/* ============================================================
+   5. DOBA, POGODA, NIEBO
+   ============================================================ */
+/* 0 = pełny dzień, 1 = pełna noc, z płynnymi przejściami */
+function nf(){
+  const t = (S.t % DAY_LEN)/DAY_LEN;
+  if(t < 0.06) return 1 - t/0.06;         // świt
+  if(t < 0.44) return 0;                  // dzień
+  if(t < 0.56) return (t-0.44)/0.12;      // zmierzch
+  if(t < 0.94) return 1;                  // noc
+  return 1 - (t-0.94)/0.06;               // brzask
+}
+function timeName(){
+  const t = (S.t % DAY_LEN)/DAY_LEN;
+  if(t < 0.06) return "ŚWIT";
+  if(t < 0.44) return "DZIEŃ";
+  if(t < 0.56) return "ZMIERZCH";
+  if(t < 0.94) return "NOC";
+  return "BRZASK";
+}
+function sky(n){
+  const top = [ [92,146,178], [16,22,44] ], bot = [ [198,214,206], [34,30,58] ];
+  const mix = (a,b) => Math.round(a+(b-a)*n);
+  const c1 = `rgb(${mix(top[0][0],top[1][0])},${mix(top[0][1],top[1][1])},${mix(top[0][2],top[1][2])})`;
+  const c2 = `rgb(${mix(bot[0][0],bot[1][0])},${mix(bot[0][1],bot[1][1])},${mix(bot[0][2],bot[1][2])})`;
+  const grd = g.createLinearGradient(0,0,0,H*0.8);
+  grd.addColorStop(0,c1); grd.addColorStop(1,c2);
+  return grd;
+}
+
+/* ============================================================
+   6. ŻYCIE NA ALEI
+   ============================================================ */
+const cars = [], peds = [], birds = [], drops = [], parts = [], floaters = [];
+let dog = {p:0,on:false,timer:6};
+function seedLife(){
+  cars.length = 0; peds.length = 0; birds.length = 0;
+  for(let i=0;i<26;i++) cars.push({
+    p:Math.random()*PLOTS, lane:[ROW.ROAD1,ROW.ROAD3][i%2],
+    sp:(i%2?1:-1)*(2.6+Math.random()*2.4), bus:Math.random()<0.16,
+    col:CARCOL[Math.floor(Math.random()*CARCOL.length)]
+  });
+  for(let i=0;i<34;i++) peds.push({
+    p:Math.random()*PLOTS, row:[ROW.WALK,ROW.WALK2][i%2],
+    sp:(Math.random()<0.5?1:-1)*(0.5+Math.random()*0.6),
+    col:["#d8657a","#4f92c4","#d9b45b","#68b389","#c9c9d4","#a074c6"][i%6]
+  });
+  for(let i=0;i<9;i++) birds.push({x:Math.random()*W, y:40+Math.random()*90, sp:14+Math.random()*22});
+}
+function popText(x,y,txt,col){ floaters.push({x,y,txt,a:1,col:col||"#ffd166",vy:-32}); }
+function burst(x,y,col,n){
+  for(let i=0;i<n;i++) parts.push({x,y,
+    vx:(Math.random()-0.5)*260, vy:-Math.random()*300-40, a:1,
+    col:col, s:2+Math.random()*3});
+}
+function confetti(){
+  const cols=["#c9f24d","#ffb84d","#3fd1a8","#ff6b6b","#9d7bff"];
+  for(let i=0;i<110;i++) parts.push({x:W/2+(Math.random()-0.5)*160, y:H*0.34,
+    vx:(Math.random()-0.5)*420, vy:-Math.random()*460-60, a:1,
+    col:cols[i%cols.length], s:3+Math.random()*3});
+}
+function fx(dt){
+  for(let i=parts.length-1;i>=0;i--){
+    const p = parts[i];
+    p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 900*dt; p.a -= dt*0.82;
+    if(p.a <= 0){ parts.splice(i,1); continue; }
+    g.globalAlpha = Math.max(0,p.a); g.fillStyle = p.col;
+    g.fillRect(p.x, p.y, p.s, p.s);
+  }
+  for(let i=floaters.length-1;i>=0;i--){
+    const f = floaters[i];
+    f.y += f.vy*dt; f.vy *= 0.94; f.a -= dt*0.75;
+    if(f.a <= 0){ floaters.splice(i,1); continue; }
+    g.globalAlpha = Math.max(0,f.a); g.fillStyle = f.col;
+    g.font = "600 13px 'IBM Plex Mono',monospace"; g.textAlign = "center";
+    g.fillText(f.txt, f.x, f.y);
+  }
+  g.globalAlpha = 1; g.textAlign = "left";
+}
+
+/* ============================================================
+   7. RENDER ALEI
+   ============================================================ */
+let hits = [];
+function band(row,col,from,to){
+  const a = px(from,row), b = px(to+1,row), z = S.cam.z;
+  g.fillStyle = col;
+  g.beginPath();
+  g.moveTo(a.sx,a.sy); g.lineTo(b.sx,b.sy);
+  g.lineTo(b.sx+SKEW*z, b.sy+ROWH*z); g.lineTo(a.sx+SKEW*z, a.sy+ROWH*z);
+  g.closePath(); g.fill();
+}
+function roadPaint(from,to,night){
+  const z = S.cam.z;
+  for(let i=from;i<=to;i++){
+    const m = px(i+0.5, ROW.ROAD2+0.9);
+    g.fillStyle = night ? "rgba(228,228,196,.22)" : "rgba(244,244,222,.58)";
+    g.fillRect(m.sx-10*z, m.sy, 20*z, 2*z);
+    if(i % DISTRICT === 0){
+      for(let k=0;k<6;k++){
+        const p = px(i+k*0.075, ROW.ROAD1);
+        g.fillStyle = "rgba(246,246,236,.75)";
+        g.fillRect(p.sx, p.sy, 4*z, ROWH*3*z);
+      }
+    }
+  }
+}
+
+/* Budynek rysowany proceduralnie: front, bok, okna, dach, szyld, neon. */
+function drawBuilding(i, c, night, now){
+  const t = tierOf(c.tier), z = S.cam.z;
+  const base = px(i, ROW.BUILD);
+  const grow = c.built ? Math.min(1, (now - c.built)/1600) : 1;
+  const ease = grow<1 ? 1-Math.pow(1-grow,3) : 1;
+  const floors = Math.max(1, Math.round(t.floors*ease));
+  const fh = 9, w = t.w*z, h = floors*fh*z;
+  const x = base.sx - w/2 + SKEW*0.5*z, y = base.sy - h + ROWH*0.6*z;
+  const col = FACADE[hash(c.brand + i) % FACADE.length];
+
+  g.fillStyle = "rgba(0,0,0,.30)";
+  g.fillRect(x+4*z, base.sy+ROWH*0.3*z, w, 4*z);
+  g.fillStyle = night ? sh(col,0.44) : col;                       // front
+  g.fillRect(x, y, w, h);
+  g.fillStyle = night ? sh(col,0.30) : sh(col,0.74);              // bok
+  g.beginPath();
+  g.moveTo(x+w, y); g.lineTo(x+w+SKEW*0.62*z, y+ROWH*0.30*z);
+  g.lineTo(x+w+SKEW*0.62*z, y+h+ROWH*0.30*z); g.lineTo(x+w, y+h);
+  g.closePath(); g.fill();
+  g.fillStyle = night ? sh(col,0.58) : sh(col,1.16);              // dach
+  g.fillRect(x-1*z, y-3*z, w+2*z, 3*z);
+
+  /* Okna zapalają się stopniowo po zmierzchu. */
+  const lit = nf();
+  const cols = Math.max(2, Math.floor(t.w/12));
+  for(let f=0; f<floors; f++){
+    for(let k=0; k<cols; k++){
+      const wx = x + (k+0.5)*(w/cols) - 2.4*z;
+      const wy = y + h - (f+1)*fh*z + 2.4*z;
+      const on = lit > 0.25 && ((hash(i+":"+f+":"+k) % 100)/100) < lit*0.82;
+      g.fillStyle = on ? (hash(i+f+k)%7 ? "#ffd98a" : "#a8e8ff") : (night ? "#141a20" : "#3c4750");
+      g.fillRect(wx, wy, 4.8*z, 4.2*z);
+    }
+  }
+
+  /* Szyld z nazwą. */
+  const bh = 11*z, by = y + h - bh - 2*z;
+  g.fillStyle = night ? "#0e1216" : "#1a2027";
+  g.fillRect(x+2*z, by, w-4*z, bh);
+  const accent = c.neon ? ["#c9f24d","#ff6b6b","#3fd1a8","#9d7bff","#ffb84d"][hash(c.brand)%5] : "#cfd8d4";
+  if(c.neon && night){
+    const flick = 0.72 + Math.sin(now/90 + i)*0.1 + (Math.random()<0.02 ? -0.35 : 0);
+    g.globalAlpha = Math.max(0.3, flick);
+    g.shadowColor = accent; g.shadowBlur = 14*z;
+  }
+  g.fillStyle = accent;
+  g.font = `700 ${Math.max(6, Math.min(9, w/ (c.brand.length*0.62)))*1}px Silkscreen,monospace`;
+  g.textAlign = "center";
+  g.fillText(c.brand.slice(0,14).toUpperCase(), x+w/2, by + bh*0.74);
+  g.shadowBlur = 0; g.globalAlpha = 1; g.textAlign = "left";
+
+  /* Billboard na dachu. */
+  if(c.board){
+    const bw = w*0.86, bhh = 13*z, bx = x + (w-bw)/2, byy = y - 3*z - bhh - 5*z;
+    g.fillStyle = "#2b3238"; g.fillRect(bx+bw*0.45, y-3*z-5*z, 3*z, 5*z);
+    g.fillStyle = night ? "#1b2228" : "#e9eee9"; g.fillRect(bx, byy, bw, bhh);
+    g.fillStyle = night ? accent : "#20262b";
+    g.font = `400 ${7*z}px Silkscreen,monospace`; g.textAlign = "center";
+    g.fillText((c.slogan||"REKLAMA").slice(0,18).toUpperCase(), bx+bw/2, byy+bhh*0.72);
+    g.textAlign = "left";
+  }
+  if(grow < 1){
+    g.strokeStyle = "#ffb84d"; g.lineWidth = 1;
+    g.strokeRect(x-2*z, y-2*z, w+4*z, h+4*z);
+    if(Math.random() < 0.35) parts.push({x:x+Math.random()*w, y:y+h, vx:(Math.random()-0.5)*60,
+      vy:-Math.random()*60, a:0.8, col:"#9aa5a8", s:2});
+  }
+  hits.push({x:x-6, y:y-20, w:w+12, h:h+30, i});
+}
+
+/* Wolna działka po stronie budynków. */
+function drawEmptyNorth(i){
+  const z = S.cam.z, a = px(i, ROW.BUILD);
+  const w = 46*z;
+  g.strokeStyle = "rgba(201,242,77,.22)";
+  g.setLineDash([4*z,4*z]); g.lineWidth = 1;
+  g.strokeRect(a.sx-w/2+SKEW*0.5*z, a.sy-16*z+ROWH*0.3*z, w, 16*z);
+  g.setLineDash([]);
+  g.fillStyle = "rgba(201,242,77,.30)";
+  g.font = `400 ${7*z}px Silkscreen,monospace`; g.textAlign = "center";
+  g.fillText("#"+i, a.sx+SKEW*0.5*z, a.sy-4*z);
+  g.textAlign = "left";
+  hits.push({x:a.sx-w/2, y:a.sy-22*z, w:w+10, h:26*z, i});
+}
+
+/* Obiekty po stronie parku. */
+function drawSouth(i, night, now){
+  const key = SOUTH_OFF + i, c = S.plots[key], z = S.cam.z;
+  const b = px(i, ROW.PARK1);
+  if(!c){
+    if(i % 2 === 0){                               // drzewa na wolnych działkach
+      const th = 14*z;
+      g.fillStyle = night ? "#20301f" : "#3f6b3c";
+      g.fillRect(b.sx-1.5*z, b.sy-th*0.5, 3*z, th*0.5);
+      g.fillStyle = night ? "#1c3a24" : "#5d9a4f";
+      g.fillRect(b.sx-6*z, b.sy-th, 12*z, th*0.6);
+    }
+    hits.push({x:b.sx-18, y:b.sy-20, w:36, h:34, i:key});
+    return;
+  }
+  const t = tierOf(c.tier);
+  const grow = c.built ? Math.min(1,(now-c.built)/1400) : 1;
+  const w = t.w*z*grow, h = 20*z*grow;
+  const accent = ["#c9f24d","#ff6b6b","#3fd1a8","#9d7bff","#ffb84d"][hash(c.brand)%5];
+  g.fillStyle = "rgba(0,0,0,.28)"; g.fillRect(b.sx-w/2+3*z, b.sy+2*z, w, 3*z);
+  if(t.k === "arch"){
+    g.fillStyle = night ? "#231a33" : "#6a5a8c";
+    g.fillRect(b.sx-w/2, b.sy-h, 5*z, h); g.fillRect(b.sx+w/2-5*z, b.sy-h, 5*z, h);
+    g.fillStyle = accent;
+    if(night){ g.shadowColor = accent; g.shadowBlur = 16*z; }
+    g.fillRect(b.sx-w/2, b.sy-h-4*z, w, 4*z);
+    g.shadowBlur = 0;
+  }else{
+    g.fillStyle = night ? "#2a2520" : "#cbb89a";
+    g.fillRect(b.sx-w/2, b.sy-h, w, h);
+    g.fillStyle = night ? sh(accent,0.6) : accent;
+    g.fillRect(b.sx-w/2, b.sy-h-4*z, w, 5*z);
+    g.fillStyle = night ? "#3a3a30" : "#8c8470";
+    for(let k=0;k<3;k++) g.fillRect(b.sx-w/2+ (k+0.6)*(w/4), b.sy-h*0.7, w/8, h*0.45);
+  }
+  const label = c.brand.slice(0,12).toUpperCase();
+  g.font = `400 ${6.5*z}px Silkscreen,monospace`; g.textAlign = "center";
+  const lw = g.measureText(label).width + 8*z;
+  g.fillStyle = "rgba(10,15,18,.72)";
+  g.fillRect(b.sx-lw/2, b.sy-h-13*z, lw, 10*z);
+  if(c.neon && night){ g.shadowColor = accent; g.shadowBlur = 12*z; }
+  g.fillStyle = c.neon && night ? accent : (night ? "#cfdad5" : "#e9f2ec");
+  g.fillText(label, b.sx, b.sy-h-5.5*z);
+  g.shadowBlur = 0; g.textAlign = "left";
+  hits.push({x:b.sx-w/2-6, y:b.sy-h-16, w:w+12, h:h+24, i:key});
+}
+
+/* Park ciągnie się do dolnej krawędzi: latarnie, ławki i drzewa na pierwszym planie. */
+function foreground(night, now){
+  const z = S.cam.z, base = px(0, ROW.PARK3 + 1).sy;
+  if(base < H){
+    g.fillStyle = night ? "#101d14" : "#356032";
+    g.fillRect(0, base, W, H - base);
+    g.fillStyle = night ? "#0d1710" : "#2d5029";
+    g.fillRect(0, base + (H-base)*0.55, W, (H-base)*0.45);
+  }
+  const row = px(0, ROW.PARK3).sy + 10*z;
+  const from = Math.max(0, plotAt(-200)), to = Math.min(PLOTS-1, plotAt(W+200));
+  for(let i=from;i<=to;i++){
+    const x = px(i, ROW.PARK3).sx, hsh = hash("fg"+i);
+    if(hsh % 3 === 0){                                   // latarnia
+      const lh = 34*z;
+      g.fillStyle = night ? "#232b2f" : "#3d474b";
+      g.fillRect(x-1.5*z, row-lh, 3*z, lh);
+      g.fillStyle = night ? "#ffe9a8" : "#b9c4c0";
+      g.fillRect(x-4*z, row-lh-4*z, 9*z, 4*z);
+      if(night){
+        g.globalAlpha = .12; g.fillStyle = "#ffe9a8";
+        g.beginPath(); g.moveTo(x-4*z, row-lh);
+        g.lineTo(x+22*z, row+14*z); g.lineTo(x-26*z, row+14*z); g.closePath(); g.fill();
+        g.globalAlpha = 1;
+      }
+    }else if(hsh % 3 === 1){                             // drzewo
+      const th = (26 + hsh%14)*z, sway = Math.sin(now/900 + i)*1.5*z;
+      g.fillStyle = night ? "#241a12" : "#5b4326";
+      g.fillRect(x-2*z, row-th*0.45, 4*z, th*0.45);
+      g.fillStyle = night ? "#17301d" : "#4e8f45";
+      g.fillRect(x-11*z+sway, row-th, 22*z, th*0.62);
+      g.fillStyle = night ? "#123" : "#5fa754";
+      g.fillRect(x-7*z+sway, row-th-5*z, 14*z, 6*z);
+    }else{                                               // ławka
+      g.fillStyle = night ? "#2a2119" : "#7a5c34";
+      g.fillRect(x-10*z, row-6*z, 20*z, 3*z);
+      g.fillRect(x-10*z, row-12*z, 20*z, 3*z);
+      g.fillStyle = night ? "#1d242a" : "#41494d";
+      g.fillRect(x-9*z, row-6*z, 2*z, 6*z); g.fillRect(x+7*z, row-6*z, 2*z, 6*z);
+    }
+  }
+}
+
+function drawMinimap(){
+  const w = Math.min(190, W*0.42), h = 7, x = W/2 - w/2, y = H - 100;
+  g.fillStyle = "rgba(10,15,18,.82)"; g.fillRect(x-2, y-2, w+4, h+4);
+  g.fillStyle = "#1d272d"; g.fillRect(x, y, w, h);
+  for(const k in S.plots){
+    const i = +k; if(isSouth(i)) continue;
+    g.fillStyle = "#c9f24d";
+    g.fillRect(x + (i/PLOTS)*w, y, Math.max(1, w/PLOTS), h);
+  }
+  const cur = Math.max(0, Math.min(1, plotAt(W/2)/PLOTS));
+  g.fillStyle = "#ffb84d"; g.fillRect(x + cur*w - 1, y-3, 3, h+6);
+}
+
+function rain(dt, night){
+  if(S.weather !== "rain"){ drops.length = 0; return; }
+  while(drops.length < 150) drops.push({x:Math.random()*W, y:Math.random()*H, v:620+Math.random()*420});
+  g.strokeStyle = night ? "rgba(150,190,220,.32)" : "rgba(210,230,245,.42)";
+  g.lineWidth = 1; g.beginPath();
+  for(const d of drops){
+    d.y += d.v*dt; d.x += 60*dt;
+    if(d.y > H){ d.y = -10; d.x = Math.random()*W; }
+    g.moveTo(d.x, d.y); g.lineTo(d.x-3, d.y-11);
+  }
+  g.stroke();
+}
+
+function draw(dt, now){
+  const n = nf(), night = n > 0.5;
+  g.fillStyle = sky(n); g.fillRect(0,0,W,H);
+
+  /* słońce i księżyc po łuku */
+  const dayT = (S.t % DAY_LEN)/DAY_LEN;
+  const arc = (dayT < 0.5 ? dayT/0.5 : (dayT-0.5)/0.5);
+  const ax = arc*(W+120)-60, ay = H*0.34 - Math.sin(arc*Math.PI)*H*0.26;
+  if(dayT < 0.5){ g.fillStyle = "#ffe9a0"; g.fillRect(ax-13, ay-13, 26, 26); g.fillStyle="#fff6cf"; g.fillRect(ax-8,ay-8,16,16); }
+  else { g.fillStyle = "#e8eef7"; g.fillRect(ax-10, ay-10, 20, 20); g.fillStyle = sky(n); g.fillRect(ax-2, ay-12, 12, 16); }
+
+  if(n < 0.8){
+    g.globalAlpha = (1-n)*0.55;
+    for(let k=0;k<7;k++){
+      const cx = ((S.t*6*(1+(k%3)*0.4) + k*250) % (W+320)) - 160, cy = 38 + ((k*53)%96);
+      g.fillStyle = "#f2f7f4";
+      g.fillRect(cx,cy,56,10); g.fillRect(cx+13,cy-8,30,10); g.fillRect(cx+27,cy-15,18,9);
+    }
+    g.globalAlpha = 1;
+  }
+  if(n > 0.35){
+    g.fillStyle = `rgba(255,255,255,${(n-0.35)*0.75})`;
+    for(let i=0;i<70;i++) g.fillRect((i*137)%W, (i*71)%(H*0.32), 2, 2);
+  }
+  for(const b of birds){
+    b.x += b.sp*dt*(1+n*0.2); if(b.x > W+20){ b.x = -20; b.y = 40+Math.random()*90; }
+    g.fillStyle = night ? "#2a3a46" : "#3d4a52";
+    const f = Math.sin(now/120 + b.x*0.05)*3;
+    g.fillRect(b.x, b.y, 3, 2); g.fillRect(b.x-4, b.y-f, 4, 2); g.fillRect(b.x+3, b.y-f, 4, 2);
+  }
+
+  hits = [];
+  const from = Math.max(0, plotAt(-240)), to = Math.min(PLOTS-1, plotAt(W+240));
+
+  band(ROW.BACK, night ? "#14201a" : "#2f4d38", from-2, to+2);
+  for(let i=from;i<=to;i++){
+    const c = S.plots[i];
+    if(c) drawBuilding(i, c, night, now); else drawEmptyNorth(i);
+  }
+  band(ROW.WALK,  night ? "#222a2f" : "#98a3a6", from-2, to+2);
+  band(ROW.ROAD1, night ? "#161b1f" : "#2e3439", from-2, to+2);
+  band(ROW.ROAD2, night ? "#161b1f" : "#2e3439", from-2, to+2);
+  band(ROW.ROAD3, night ? "#161b1f" : "#2e3439", from-2, to+2);
+  roadPaint(from, to, night);
+
+  const z = S.cam.z;
+  for(const c of cars){
+    c.p += c.sp*dt; if(c.p > PLOTS) c.p = 0; if(c.p < 0) c.p = PLOTS;
+    const {sx,sy} = px(c.p, c.lane);
+    if(sx < -70 || sx > W+70) continue;
+    const w = (c.bus?34:21)*z, h = (c.bus?13:9)*z;
+    g.fillStyle = "rgba(0,0,0,.30)"; g.fillRect(sx-w/2, sy+h*0.5, w, 3*z);
+    g.fillStyle = night ? sh(c.col,0.62) : c.col; g.fillRect(sx-w/2, sy-h/2, w, h);
+    g.fillStyle = night ? "#2b3138" : "#cfe3ee"; g.fillRect(sx-w/2+3*z, sy-h/2+2*z, w-6*z, h*0.4);
+    if(night){
+      g.fillStyle = "#ffe9a8"; g.fillRect(sx+(c.sp>0?w/2-2*z:-w/2), sy-1*z, 3*z, 3*z);
+      g.fillStyle = "#ff6b6b"; g.fillRect(sx+(c.sp>0?-w/2:w/2-2*z), sy-1*z, 2*z, 3*z);
+      g.globalAlpha = .14; g.fillStyle = "#ffe9a8";
+      g.fillRect(sx+(c.sp>0?w/2:-w/2-30*z), sy-2*z, 30*z, 5*z); g.globalAlpha = 1;
+    }
+  }
+  for(const m of peds){
+    m.p += m.sp*dt; if(m.p > PLOTS) m.p = 0; if(m.p < 0) m.p = PLOTS;
+    const {sx,sy} = px(m.p, m.row);
+    if(sx < -30 || sx > W+30) continue;
+    const bob = Math.sin(now/140 + m.p*3)*1.3*z;
+    g.fillStyle = "#1d2328"; g.fillRect(sx-1.5*z, sy-2*z+bob, 3*z, 4*z);
+    g.fillStyle = night ? sh(m.col,0.7) : m.col; g.fillRect(sx-2*z, sy-8*z+bob, 4*z, 6*z);
+    g.fillStyle = "#e8c39a"; g.fillRect(sx-1.5*z, sy-11*z+bob, 3*z, 3*z);
+  }
+  dog.timer -= dt;
+  if(dog.timer < 0){ dog.on = true; dog.timer = 16+Math.random()*14; dog.p = plotAt(0)-3; }
+  if(dog.on){
+    dog.p += dt*3.4;
+    const {sx,sy} = px(dog.p, ROW.ROAD2);
+    g.fillStyle = "#c98d54"; g.fillRect(sx-4*z, sy-3*z, 8*z, 4*z); g.fillRect(sx+3*z, sy-6*z, 3*z, 3*z);
+    if(dog.p > plotAt(W)+4) dog.on = false;
+  }
+
+  if(S.run.on) drawRun(now);
+
+  band(ROW.WALK2, night ? "#222a2f" : "#98a3a6", from-2, to+2);
+  band(ROW.PARK1, night ? "#182a1e" : "#4d7d49", from-2, to+2);
+  band(ROW.PARK2, night ? "#15261b" : "#457443", from-2, to+2);
+  band(ROW.PARK3, night ? "#122117" : "#3c683b", from-2, to+2);
+  for(let i=from;i<=to;i++) drawSouth(i, night, now);
+
+  foreground(night, now);
+  rain(dt, night);
+  if(n > 0){ g.fillStyle = `rgba(10,16,34,${n*0.26})`; g.fillRect(0,0,W,H); }
+  if(S.run.flash > 0){
+    g.fillStyle = `rgba(255,107,107,${S.run.flash*0.5})`; g.fillRect(0,0,W,H);
+    S.run.flash = Math.max(0, S.run.flash - dt*2.2);
+  }
+  drawMinimap();
+  fx(dt);
+}
+
+/* ============================================================
+   8. BIEG BOBRA
+   Dwa czasowniki: skok nad przeszkodą, ślizg pod barierką.
+   ============================================================ */
+const PHYS = {grav:1500, jump:540, carClear:14, busClear:19, carW:0.30, busW:0.52, slideTime:0.42};
+const R = S.run;
+const runSpeed = () => (2.9 + Math.min(2.6, R.p/70)) * (S.ups.boots ? 1.12 : 1);
+const jumpPower = () => PHYS.jump * (S.ups.jump ? 1.2 : 1);
+const beaverTop = () => R.y + (R.slide > 0 ? 9 : 19);
+
+function runStart(){
+  Object.assign(R, {on:true, dead:false, p:0, y:0, vy:0, slide:0, score:0, jumped:0,
+    coins:0, combo:1, comboRaw:0, air:0, traffic:[], obst:[], pick:[],
+    nextCar:26, nextObst:34+Math.random()*10, nextCoin:12+Math.random()*8,
+    flash:0, startedNight: nf() > 0.5});
+  R.shield = (S.ups.helmet ? 1 : 0) + (S.ups.vest ? 1 : 0);
+  closeModal(); closePanel();
+  S.cam.z = 1;
+  const el = document.getElementById("run");
+  el.style.display = "flex";
+  requestAnimationFrame(()=> el.classList.add("in"));
+  document.getElementById("btnRun").textContent = "STOP";
+  toast("Tapnij, żeby skoczyć. Przytrzymaj w dół albo S, żeby się ślizgać.");
+}
+function runStop(){
+  R.on = false;
+  const el = document.getElementById("run");
+  el.classList.remove("in");
+  setTimeout(()=>{ if(!R.on) el.style.display = "none"; }, 300);
+  document.getElementById("btnRun").textContent = "BIEG";
+}
+function runJump(){
+  if(!R.on || R.dead) return;
+  if(R.y <= 0.6){ R.vy = jumpPower(); R.air = 0; R.slide = 0; burstDust(); return; }
+  if(S.ups.double && R.air < 1){ R.vy = jumpPower()*0.87; R.air++; burstDust(); }
+}
+function runSlide(){
+  if(!R.on || R.dead) return;
+  if(R.y > 0.6){ R.vy = Math.min(R.vy, -260); }        // szybkie lądowanie
+  R.slide = PHYS.slideTime;
+}
+function burstDust(){
+  const s = px(R.p, ROW.ROAD2);
+  for(let i=0;i<5;i++) parts.push({x:s.sx, y:s.sy, vx:(Math.random()-0.5)*90,
+    vy:-Math.random()*70, a:0.7, col:"#8fa0a6", s:2});
+}
+function addCombo(){
+  R.comboRaw++;
+  const m = Math.min(5, 1 + Math.floor(R.comboRaw/6));
+  if(m !== R.combo){
+    R.combo = m;
+    const el = document.getElementById("combo");
+    el.classList.remove("hot"); void el.offsetWidth; el.classList.add("hot");
+    const s = px(R.p, ROW.ROAD2);
+    popText(s.sx, s.sy-70, "KOMBO x"+m, "#ffb84d");
+  }
+}
+function breakCombo(){ R.comboRaw = 0; R.combo = 1; }
+
+function runHit(reason){
+  if(R.shield > 0){
+    R.shield--; R.flash = 0.7; breakCombo();
+    toast(R.shield > 0 ? "Kamizelka trzyma. Zostało jeszcze jedno zderzenie." : "Kask uratował bobra.", "warn");
+    return true;
+  }
+  runEnd(reason);
+  return false;
+}
+
+function runUpdate(dt, now){
+  if(!R.on || R.dead) return;
+  const rush = (Math.floor(R.p) % 60) < 12;            // godziny szczytu
+  R.p += runSpeed()*dt;
+  R.vy -= PHYS.grav*dt; R.y += R.vy*dt;
+  if(R.y < 0){ R.y = 0; R.vy = 0; }
+  if(R.slide > 0) R.slide -= dt;
+  R.score = Math.round(R.p*10)/10;
+  S.cam.x = W*0.28 - R.p*CELL*S.cam.z;
+  clampCam();
+  if(R.p >= PLOTS-1){ runEnd("Bóbr przebiegł całą aleję!"); return; }
+
+  if(R.p > R.nextCar - 40){
+    const bus = Math.random() < (rush ? 0.30 : 0.18);
+    R.traffic.push({p:R.nextCar, sp:-(2.5+Math.random()*1.6), bus,
+      col: bus ? "#e8b93f" : CARCOL[Math.floor(Math.random()*CARCOL.length)], cleared:false});
+    R.nextCar += (bus ? 19 : 12) + Math.random()*(rush ? 6 : 12);
+  }
+  for(let i=R.traffic.length-1;i>=0;i--){
+    const v = R.traffic[i];
+    v.p += v.sp*dt;
+    if(v.p < R.p-6){ R.traffic.splice(i,1); continue; }
+    const d = Math.abs(v.p - R.p), w = v.bus ? PHYS.busW : PHYS.carW;
+    const clear = v.bus ? PHYS.busClear : PHYS.carClear;
+    if(d < w){
+      if(R.y < clear){
+        if(runHit(v.bus ? "Autobus nie hamował." : "Bóbr spotkał samochód.")){ R.traffic.splice(i,1); continue; }
+        return;
+      }
+      if(!v.cleared){ v.cleared = true; R.jumped++; addCombo(); }
+    }
+  }
+
+  if(R.p > R.nextObst - 34){
+    const t = OBST[Math.floor(Math.random()*OBST.length)];
+    const clash = R.traffic.some(v => Math.abs(v.p - R.nextObst) < 3);
+    if(!clash) R.obst.push({...t, p:R.nextObst, cleared:false});
+    R.nextObst += (rush ? 11 : 15) + Math.random()*16;
+  }
+  for(let i=R.obst.length-1;i>=0;i--){
+    const o = R.obst[i];
+    if(o.p < R.p-6){ R.obst.splice(i,1); continue; }
+    const d = Math.abs(o.p - R.p);
+    if(d < o.w){
+      const safe = o.slide ? (beaverTop() < o.low || R.y > o.top) : (R.y >= o.h);
+      if(!safe){
+        if(runHit("Bóbr wpadł na: " + o.n + ".")){ R.obst.splice(i,1); continue; }
+        return;
+      }
+      if(!o.cleared){ o.cleared = true; R.jumped++; addCombo(); }
+    }
+  }
+
+  const cap = coinCap();
+  if(R.p > R.nextCoin - 34 && R.coins < cap){
+    const high = Math.random() < 0.6;
+    const clash = R.traffic.some(v => Math.abs(v.p - R.nextCoin) < 2)
+               || R.obst.some(o => Math.abs(o.p - R.nextCoin) < 2);
+    if(!clash){
+      const n = 1 + Math.floor(Math.random()*3);
+      for(let k=0;k<n;k++) R.pick.push({p:R.nextCoin + k*0.45, h: high ? 22+Math.random()*14 : 7});
+    }
+    R.nextCoin += 10 + Math.random()*13;
+  }
+  for(let i=R.pick.length-1;i>=0;i--){
+    const q = R.pick[i];
+    if(q.p < R.p-5){ R.pick.splice(i,1); continue; }
+    const dp = Math.abs(q.p - R.p), dy = Math.abs(R.y - q.h);
+    const got = S.ups.magnet ? (dp < 1.5 && dy < 40) : (dp < 0.55 && dy < 14);
+    if(got && R.coins < cap){
+      R.pick.splice(i,1); R.coins += R.combo > 2 ? 2 : 1;
+      const s = px(q.p, ROW.ROAD2);
+      popText(s.sx, s.sy - q.h*S.cam.z, "+"+(R.combo>2?2:1)+" PXT", "#c9f24d");
+      burst(s.sx, s.sy - q.h*S.cam.z, "#c9f24d", 5);
+    }
+  }
+
+  document.getElementById("rScore").textContent = R.score.toFixed(1);
+  document.getElementById("rJump").textContent = "🚗 " + R.jumped + (R.shield ? " 🪖".repeat(R.shield) : "");
+  document.getElementById("combo").textContent = "x" + R.combo;
+  document.getElementById("rCoins").textContent = R.coins + "/" + cap + " PXT";
+}
+
+function runEnd(reason){
+  R.dead = true;
+  const nightBonus = R.startedNight ? Math.round(R.coins*0.5) : 0;
+  const payout = R.coins + nightBonus;
+  if(R.score > S.best){ S.best = R.score; }
+  S.tokens += payout; S.totalEarned += payout;
+  questProgress("dist", R.score);
+  questProgress("coins", R.coins);
+  questProgress("jump", R.jumped);
+  questProgress("combo", R.combo);
+  const plot = Math.min(PLOTS-1, Math.max(0, Math.round(R.p)));
+  const taken = !!S.plots[plot];
+  save(); hud();
+  confetti();
+  modal(`<h3>${esc(reason)}</h3>
+    <p class="sub">Dobiegłeś do dzielnicy ${districtName(plot)}.</p>
+    <div class="kv"><span>Dystans</span><b class="num">${R.score.toFixed(1)} działek</b></div>
+    <div class="kv"><span>Ominięte przeszkody</span><b class="num">${R.jumped}</b></div>
+    <div class="kv"><span>Najwyższe kombo</span><b class="num">x${R.combo}</b></div>
+    <div class="kv"><span>Żetony</span><b class="num good">${R.coins} PXT</b></div>
+    ${nightBonus?`<div class="kv"><span>Premia nocna</span><b class="num good">+${nightBonus} PXT</b></div>`:""}
+    <div class="kv"><span>Rekord dystansu</span><b class="num">${S.best.toFixed(1)}</b></div>
+    <button class="btn go" onclick="runStart()">JESZCZE RAZ</button>
+    <button class="btn" onclick="runStop();closeModal();focusPlot(${plot});${taken?"":`openBuild(${plot})`}">
+      ${taken ? "OBEJRZYJ BUDYNEK "+plotLabel(plot) : "POSTAW COŚ NA "+plotLabel(plot)}</button>
+    <button class="btn" onclick="runStop();closeModal()">WRÓĆ DO MIASTA</button>
+    <p class="tiny">Limit zbierania to ${coinCap()} PXT na bieg. Torba bobra podnosi go do 60,
+       a bieg zaczęty po zmierzchu płaci półtora raza więcej.</p>`);
+}
+
+/* --- rysowanie sceny biegu --- */
+function drawRun(now){
+  const z = S.cam.z;
+  for(const v of R.traffic){
+    const {sx,sy} = px(v.p, ROW.ROAD2);
+    if(sx < -80 || sx > W+80) continue;
+    const w = (v.bus?36:22)*z, h = (v.bus?15:10)*z;
+    g.fillStyle = "rgba(0,0,0,.34)"; g.fillRect(sx-w/2, sy+h*0.5, w, 3*z);
+    g.fillStyle = v.col; g.fillRect(sx-w/2, sy-h/2, w, h);
+    g.fillStyle = "#cfe3ee"; g.fillRect(sx-w/2+3*z, sy-h/2+2*z, w-6*z, h*0.4);
+    g.fillStyle = "#20262b";
+    g.fillRect(sx-w/2+3*z, sy+h/2-1*z, 5*z, 3*z); g.fillRect(sx+w/2-8*z, sy+h/2-1*z, 5*z, 3*z);
+  }
+  for(const o of R.obst){
+    const {sx,sy} = px(o.p, ROW.ROAD2);
+    if(sx < -60 || sx > W+60) continue;
+    if(o.slide){
+      g.fillStyle = o.k === "banner" ? "#c0513f" : "#d8d2c4";
+      g.fillRect(sx-16*z, sy-o.top*z, 32*z, (o.top-o.low)*z);
+      g.fillStyle = "#3a4046";
+      g.fillRect(sx-17*z, sy-o.top*z, 3*z, o.top*z); g.fillRect(sx+14*z, sy-o.top*z, 3*z, o.top*z);
+      g.fillStyle = "#12171a"; g.font = `400 ${6*z}px Silkscreen,monospace`; g.textAlign = "center";
+      g.fillText("ŚLIZG", sx, sy-(o.low+(o.top-o.low)*0.42)*z); g.textAlign = "left";
+    }else{
+      const col = {cone:"#e8763c",bin:"#4b5e52",puddle:"#4a7f96",scooter:"#c9ccd2",
+                   crate:"#a3793f",hydrant:"#c33f3f"}[o.k] || "#999";
+      g.fillStyle = "rgba(0,0,0,.3)"; g.fillRect(sx-9*z, sy+1*z, 18*z, 3*z);
+      g.fillStyle = col;
+      if(o.k === "puddle") g.fillRect(sx-14*z, sy-2*z, 28*z, 4*z);
+      else g.fillRect(sx-8*z, sy-o.h*z, 16*z, o.h*z);
+      if(o.k === "cone"){ g.fillStyle = "#f3f3ef"; g.fillRect(sx-8*z, sy-o.h*0.55*z, 16*z, 3*z); }
+    }
+  }
+  for(const q of R.pick){
+    const {sx,sy} = px(q.p, ROW.ROAD2);
+    if(sx < -40 || sx > W+40) continue;
+    const y = sy - q.h*z, bob = Math.sin(now/200 + q.p)*2*z;
+    g.fillStyle = "#c9f24d"; g.shadowColor = "#c9f24d"; g.shadowBlur = 9*z;
+    g.fillRect(sx-4*z, y-4*z+bob, 8*z, 8*z);
+    g.shadowBlur = 0;
+    g.fillStyle = "#6c8f1f"; g.fillRect(sx-1.5*z, y-2*z+bob, 3*z, 4*z);
+  }
+  drawBeaver(now);
+}
+function drawBeaver(now){
+  const z = S.cam.z, {sx,sy} = px(R.p, ROW.ROAD2);
+  const y = sy - R.y*z;
+  const sliding = R.slide > 0, air = R.y > 0.6;
+  const bodyH = (sliding ? 9 : 16)*z, bodyW = (sliding ? 24 : 18)*z;
+  const step = Math.sin(now/70)*3*z;
+
+  g.fillStyle = "rgba(0,0,0,.32)";
+  const shW = Math.max(6, 18 - R.y*0.10)*z;
+  g.fillRect(sx-shW/2, sy+1*z, shW, 3*z);
+
+  if(!air && !sliding && Math.random() < 0.20)
+    parts.push({x:sx-8*z, y:sy, vx:-40-Math.random()*50, vy:-Math.random()*40, a:0.5, col:"#8fa0a6", s:2});
+
+  g.fillStyle = "#7a5230";                                   // ogon
+  g.fillRect(sx-bodyW/2-7*z, y-bodyH*0.45, 8*z, 5*z);
+  g.fillStyle = "#9a6a3c";                                   // tułów
+  g.fillRect(sx-bodyW/2, y-bodyH, bodyW, bodyH);
+  g.fillStyle = "#b98a56";                                   // brzuch
+  g.fillRect(sx-bodyW/2+2*z, y-bodyH*0.55, bodyW-4*z, bodyH*0.42);
+  if(!sliding){
+    g.fillStyle = "#9a6a3c";                                 // głowa
+    g.fillRect(sx+bodyW/2-8*z, y-bodyH-9*z, 12*z, 10*z);
+    g.fillStyle = "#6f4a2a";
+    g.fillRect(sx+bodyW/2-6*z, y-bodyH-12*z, 4*z, 3*z);      // ucho
+    g.fillStyle = "#12171a";
+    g.fillRect(sx+bodyW/2+1*z, y-bodyH-6*z, 2.5*z, 2.5*z);   // oko
+    g.fillStyle = "#e8d3b6";
+    g.fillRect(sx+bodyW/2+2*z, y-bodyH-2.5*z, 4*z, 3*z);     // zęby
+  }else{
+    g.fillStyle = "#9a6a3c";
+    g.fillRect(sx+bodyW/2-6*z, y-bodyH-5*z, 11*z, 6*z);
+    g.fillStyle = "#12171a"; g.fillRect(sx+bodyW/2+1*z, y-bodyH-3*z, 2.5*z, 2.5*z);
+  }
+  g.fillStyle = "#6f4a2a";                                   // łapy
+  if(air){
+    g.fillRect(sx-5*z, y-1*z, 5*z, 4*z); g.fillRect(sx+2*z, y-3*z, 5*z, 4*z);
+  }else if(sliding){
+    g.fillRect(sx-2*z, y-2*z, 9*z, 3*z);
+  }else{
+    g.fillRect(sx-6*z+step, y-3*z, 5*z, 5*z); g.fillRect(sx+2*z-step, y-3*z, 5*z, 5*z);
+  }
+  if(R.shield > 0){
+    g.strokeStyle = "rgba(63,209,168,.6)"; g.lineWidth = 2;
+    g.strokeRect(sx-bodyW/2-4*z, y-bodyH-14*z, bodyW+9*z, bodyH+18*z);
+  }
+  if(R.combo >= 3){                                           // linie prędkości
+    g.strokeStyle = "rgba(201,242,77,.35)"; g.lineWidth = 2; g.beginPath();
+    for(let k=0;k<3;k++){ const yy = y-bodyH*0.3-k*6*z;
+      g.moveTo(sx-bodyW/2-14*z-k*9*z, yy); g.lineTo(sx-bodyW/2-4*z-k*9*z, yy); }
+    g.stroke();
+  }
+}
+
+/* ============================================================
+   9. KONTRAKTY
+   ============================================================ */
+function makeQuest(){
+  const def = QUEST_POOL[Math.floor(Math.random()*QUEST_POOL.length)];
+  const lvl = Math.floor(Math.random()*3);
+  const q = {k:def.k, lvl, tgt:def.tgt[lvl], pay:def.pay[lvl], prog:0, done:false};
+  if(def.k === "build") q.base = S.builtCount;
+  if(def.k === "neon")  q.base = S.neonCount;
+  return q;
+}
+function rollQuests(){ while(S.quests.length < 3) S.quests.push(makeQuest()); }
+const questText = q => QUEST_POOL.find(d => d.k === q.k).n(q.tgt);
+function questProgress(kind, value){
+  let fresh = false;
+  for(const q of S.quests){
+    if(q.k !== kind || q.done) continue;
+    if(kind === "build")      q.prog = S.builtCount - (q.base||0);
+    else if(kind === "neon")  q.prog = S.neonCount - (q.base||0);
+    else                      q.prog = Math.max(q.prog, value);
+    if(q.prog >= q.tgt){ q.done = true; fresh = true; }
+  }
+  if(fresh){ toast("Kontrakt gotowy do odbioru.", "gain"); questDot(); }
+  save();
+}
+function questDot(){
+  document.getElementById("qDot").hidden = !S.quests.some(q => q.done);
+}
+function claimQuest(n){
+  const q = S.quests[n];
+  if(!q || !q.done) return;
+  S.tokens += q.pay; S.totalEarned += q.pay;
+  toast("Kontrakt rozliczony: +" + q.pay + " PXT", "gain");
+  confetti();
+  S.quests[n] = makeQuest();
+  save(); hud(); questDot(); openQuests();
+}
+
+/* ============================================================
+   10. INTERFEJS
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s||"").replace(/[<>&"']/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => n >= 10000 ? Math.round(n/100)/10 + "k" : (Math.round(n*10)/10).toString().replace(".", ",");
+
+function toast(msg, kind){
+  const d = document.createElement("div");
+  d.className = "toast" + (kind ? " " + kind : "");
+  d.textContent = msg;
+  $("toasts").appendChild(d);
+  setTimeout(()=>{ d.classList.add("out"); setTimeout(()=>d.remove(), 320); }, 2900);
+}
+function modal(html){ $("box").innerHTML = html; $("modal").classList.add("open"); }
+function closeModal(){ $("modal").classList.remove("open"); }
+function closePanel(){ $("panel").classList.remove("open"); S.panel = null; }
+function panel(title, html){
+  S.panel = title;
+  $("panel").innerHTML =
+    `<div class="ptitle"><h4>${title}</h4><button class="x" onclick="closePanel()">ZAMKNIJ</button></div>` + html;
+  $("panel").classList.add("open");
+}
+
+let shownTokens = 0;
+function hud(){
+  const r = rate(), v = cityValue(), {r:rk, next} = rankOf(v);
+  $("hRate").textContent = fmt(r);
+  $("hCount").textContent = S.builtCount;
+  $("hLen").textContent = Object.keys(S.plots).filter(k => !isSouth(+k)).length + " / " + PLOTS;
+  $("hBest").textContent = S.best.toFixed(1);
+  $("hTime").textContent = timeName();
+  $("rankName").textContent = rk.n;
+  $("rankFill").style.width = (next ? Math.min(100, ((v-rk.t)/(next.t-rk.t))*100) : 100) + "%";
+  $("btnBuild").classList.toggle("pulse", S.builtCount === 0);
+}
+function ticker(){
+  const r = rate(), n = S.builtCount;
+  const bits = [];
+  if(n === 0) bits.push("Aleja czeka na pierwszy budynek. Pobiegnij bobrem, zbierz PXT, postaw kiosk.");
+  else bits.push(`W alei stoi ${n} ${n===1?"budynek":"budynków"} i przynosi ${fmt(r)} PXT na sekundę.`);
+  const best = Object.entries(S.plots).sort((a,b)=>(b[1].spent||0)-(a[1].spent||0))[0];
+  if(best) bits.push(`Najdroższa inwestycja: ${best[1].brand} na ${plotLabel(+best[0])}.`);
+  const d = districtOf(plotAt(W/2));
+  bits.push(`Dzielnica ${DISTRICTS[d % DISTRICTS.length]}: zabudowa ${Math.round(districtFill(d)*100)}%. Przy 60% cała dzielnica dostaje +15% czynszu.`);
+  if(S.weather === "rain") bits.push("Pada. Przechodniów mniej, neony odbijają się w kałużach.");
+  bits.push(`Rekord biegu: ${S.best.toFixed(1)} działek.`);
+  $("tickerTrack").textContent = bits.join("   ·   ");
+}
+
+/* --- panel działki --- */
+function focusPlot(i){
+  const p = isSouth(i) ? southIdx(i) : i;
+  S.cam.x = W/2 - p*CELL*S.cam.z; clampCam();
+  openPlot(i);
+}
+function openPlot(i){
+  const c = S.plots[i];
+  if(!c) return openBuild(i);
+  const t = tierOf(c.tier), y = plotYield(i, c);
+  const tiers = tiersFor(i), at = tiers.findIndex(x => x.k === c.tier);
+  const nextT = tiers[at+1];
+  const upCost = nextT ? Math.round((nextT.cost - t.cost)*1.2*locMult(i)) : 0;
+  modal(`<h3>${esc(c.brand)}</h3>
+    <p class="sub">${t.ic} ${t.n} · ${plotLabel(i)} · dzielnica ${districtName(isSouth(i)?southIdx(i):i)}</p>
+    ${c.slogan ? `<p class="sub">„${esc(c.slogan)}”</p>` : ""}
+    <div class="kv"><span>Czynsz</span><b class="num good">${fmt(y)} PXT/s</b></div>
+    <div class="kv"><span>Lokalizacja</span><b class="num">×${locMult(i).toFixed(2)}</b></div>
+    <div class="kv"><span>Sąsiedztwo</span><b class="num">×${neighbourBonus(i).toFixed(2)}</b></div>
+    <div class="kv"><span>Dzielnica</span><b class="num">×${districtBonus(i).toFixed(2)}</b></div>
+    <div class="kv"><span>Zainwestowane</span><b class="num">${c.spent} PXT</b></div>
+    ${nextT ? `<button class="btn go" ${S.tokens<upCost?"disabled":""} onclick="upgradePlot(${i})">
+        ROZBUDUJ DO: ${nextT.n.toUpperCase()} — ${upCost} PXT</button>` :
+      `<div class="kv"><span>Poziom</span><b class="good">najwyższy</b></div>`}
+    <div class="grid2">
+      <button class="btn" ${c.neon?"disabled":""} onclick="buyNeon(${i})">
+        ${c.neon ? "NEON ✓" : "NEON — "+NEON_COST+" PXT"}</button>
+      <button class="btn" ${c.board?"disabled":""} onclick="buyBoard(${i})">
+        ${c.board ? "BILLBOARD ✓" : "BILLBOARD — "+BILLBOARD_COST+" PXT"}</button>
+    </div>
+    <button class="btn" onclick="renamePlot(${i})">ZMIEŃ NAZWĘ</button>
+    <button class="btn warn" onclick="demolish(${i})">WYBURZ (zwrot 40%)</button>
+    <button class="btn" onclick="closeModal()">ZAMKNIJ</button>`);
+}
+
+/* --- formularz budowy --- */
+let pickedTier = null;
+function openBuild(i){
+  if(S.plots[i]) return openPlot(i);
+  const tiers = tiersFor(i);
+  pickedTier = pickedTier && tiers.some(t=>t.k===pickedTier) ? pickedTier : tiers[0].k;
+  const p = isSouth(i) ? southIdx(i) : i;
+  modal(`<h3>Działka ${plotLabel(i)}</h3>
+    <p class="sub">${isSouth(i)?"Strona parku":"Strona zabudowy"} · dzielnica ${districtName(p)} · mnożnik lokalizacji ×${locMult(i).toFixed(2)}</p>
+    <label for="bBrand">NAZWA</label>
+    <input id="bBrand" maxlength="14" placeholder="np. Bobrowa Piekarnia" value="">
+    <label for="bSlogan">HASŁO NA BILLBOARD</label>
+    <input id="bSlogan" maxlength="22" placeholder="np. Świeże od świtu">
+    <label>RODZAJ</label>
+    <div class="tiers" id="tierGrid">${tiers.map(t=>{
+      const cost = plotCost(i, t.k);
+      return `<div class="tier ${t.k===pickedTier?"sel":""} ${S.tokens<cost?"no":""}" data-k="${t.k}" onclick="pickTier('${t.k}',${i})">
+        <b>${t.ic} ${t.n}</b><span>${cost} PXT · ${fmt(t.yield*locMult(i))} PXT/s</span></div>`;
+    }).join("")}</div>
+    <div class="kv"><span>Twoje saldo</span><b class="num ${S.tokens<plotCost(i,pickedTier)?"bad":"good"}">${fmt(S.tokens)} PXT</b></div>
+    <button class="btn go" id="bGo" ${S.tokens<plotCost(i,pickedTier)?"disabled":""} onclick="build(${i})">POSTAW ZA ${plotCost(i,pickedTier)} PXT</button>
+    <button class="btn" onclick="closeModal();runStart()">BRAKUJE PXT — BIEGNIJ PO NIE</button>
+    <button class="btn" onclick="closeModal()">ANULUJ</button>
+    <p class="tiny">Sąsiedzi podnoszą czynsz o 8% każdy. Zabudowanie 60% dzielnicy daje jej wszystkim +15%.
+       Środek alei jest droższy, ale i dochodowy.</p>`);
+  setTimeout(()=>{ const el = $("bBrand"); if(el) el.focus(); }, 60);
+}
+function pickTier(k, i){
+  pickedTier = k;
+  const brand = $("bBrand") ? $("bBrand").value : "";
+  const slogan = $("bSlogan") ? $("bSlogan").value : "";
+  openBuild(i);
+  if($("bBrand")){ $("bBrand").value = brand; $("bSlogan").value = slogan; }
+}
+const BANNED = ["casino","kasyno","xxx","porn","viagra","seed phrase","private key","airdrop"];
+function build(i){
+  const cost = plotCost(i, pickedTier);
+  if(S.tokens < cost) return toast("Za mało PXT. Wyślij bobra na aleję.", "bad");
+  let brand = ($("bBrand").value || "").trim().slice(0,14);
+  let slogan = ($("bSlogan").value || "").trim().slice(0,22);
+  if(!brand) brand = tierOf(pickedTier).n + " " + plotLabel(i);
+  if(BANNED.some(w => (brand+" "+slogan).toLowerCase().includes(w)))
+    return toast("Ta nazwa nie przejdzie przez radę miasta.", "bad");
+  S.tokens -= cost;
+  S.plots[i] = {tier:pickedTier, brand, slogan, spent:cost, neon:false, board:false, built:performance.now()};
+  S.builtCount++;
+  questProgress("build");
+  closeModal(); confetti();
+  const p = isSouth(i) ? southIdx(i) : i;
+  const s = px(p, ROW.BUILD);
+  popText(s.sx, s.sy - 60, "−" + cost + " PXT", "#ff6b6b");
+  toast(brand + " stoi na " + plotLabel(i) + ".", "gain");
+  save(); hud(); ticker();
+}
+function upgradePlot(i){
+  const c = S.plots[i], tiers = tiersFor(i);
+  const at = tiers.findIndex(t => t.k === c.tier), nextT = tiers[at+1];
+  if(!nextT) return;
+  const cost = Math.round((nextT.cost - tierOf(c.tier).cost)*1.2*locMult(i));
+  if(S.tokens < cost) return toast("Za mało PXT na rozbudowę.", "bad");
+  S.tokens -= cost; c.tier = nextT.k; c.spent += cost; c.built = performance.now();
+  closeModal(); confetti();
+  toast(c.brand + " rośnie do: " + nextT.n + ".", "gain");
+  save(); hud(); ticker();
+}
+function buyNeon(i){
+  const c = S.plots[i];
+  if(S.tokens < NEON_COST) return toast("Neon kosztuje " + NEON_COST + " PXT.", "bad");
+  S.tokens -= NEON_COST; c.neon = true; c.spent += NEON_COST; S.neonCount++;
+  questProgress("neon");
+  toast("Neon zapalony. Po zmierzchu płaci o 30% więcej.", "gain");
+  save(); hud(); openPlot(i);
+}
+function buyBoard(i){
+  const c = S.plots[i];
+  if(S.tokens < BILLBOARD_COST) return toast("Billboard kosztuje " + BILLBOARD_COST + " PXT.", "bad");
+  S.tokens -= BILLBOARD_COST; c.board = true; c.spent += BILLBOARD_COST;
+  toast("Billboard na dachu. +18% czynszu.", "gain");
+  save(); hud(); openPlot(i);
+}
+function renamePlot(i){
+  const c = S.plots[i];
+  modal(`<h3>Zmiana szyldu</h3>
+    <label for="rBrand">NAZWA</label><input id="rBrand" maxlength="14" value="${esc(c.brand)}">
+    <label for="rSlog">HASŁO</label><input id="rSlog" maxlength="22" value="${esc(c.slogan||"")}">
+    <button class="btn go" onclick="doRename(${i})">ZAPISZ</button>
+    <button class="btn" onclick="openPlot(${i})">WRÓĆ</button>`);
+}
+function doRename(i){
+  const c = S.plots[i];
+  const b = ($("rBrand").value||"").trim().slice(0,14);
+  const s = ($("rSlog").value||"").trim().slice(0,22);
+  if(BANNED.some(w => (b+" "+s).toLowerCase().includes(w)))
+    return toast("Ta nazwa nie przejdzie przez radę miasta.", "bad");
+  if(b) c.brand = b;
+  c.slogan = s;
+  save(); openPlot(i);
+}
+function demolish(i){
+  const c = S.plots[i];
+  const back = Math.round((c.spent||0)*0.4);
+  S.tokens += back; delete S.plots[i]; S.builtCount = Math.max(0, S.builtCount-1);
+  if(c.neon) S.neonCount = Math.max(0, S.neonCount-1);
+  closeModal(); toast("Wyburzono. Zwrot " + back + " PXT.", "warn");
+  save(); hud(); ticker();
+}
+
+/* --- sklep ulepszeń --- */
+function openShop(){
+  panel("ULEPSZENIA BOBRA", UPG.map(u => {
+    const own = !!S.ups[u.k];
+    return `<div class="upg ${own?"own":""}">
+      <div class="ic">${u.ic}</div>
+      <div class="t"><b>${u.n}</b><span>${u.d}</span></div>
+      <button ${own||S.tokens<u.cost?"disabled":""} onclick="buyUpg('${u.k}')">
+        ${own ? "MASZ" : u.cost + " PXT"}</button></div>`;
+  }).join("") + `<p class="tiny" style="padding:0 11px 11px">Ulepszenia zostają na stałe.
+    Kask i kamizelka odnawiają się na początku każdego biegu.</p>`);
+}
+function buyUpg(k){
+  const u = UPG.find(x => x.k === k);
+  if(S.ups[k]) return;
+  if(S.tokens < u.cost) return toast("Za mało PXT.", "bad");
+  S.tokens -= u.cost; S.ups[k] = true;
+  toast(u.n + " kupione.", "gain");
+  burst(W/2, H*0.5, "#3fd1a8", 26);
+  save(); hud(); openShop();
+}
+
+/* --- ranking --- */
+function openBoard(){
+  const rows = Object.entries(S.plots)
+    .sort((a,b) => (b[1].spent||0) - (a[1].spent||0)).slice(0,40);
+  if(!rows.length) return panel("RANKING ALEI",
+    `<div class="row"><div class="nm">Jeszcze nic tu nie stoi. Pierwszy budynek otwiera ranking.</div></div>`);
+  panel("RANKING ALEI", rows.map(([k,c],n) => {
+    const i = +k, t = tierOf(c.tier);
+    return `<div class="row" style="animation-delay:${n*22}ms" onclick="focusPlot(${i})">
+      <div class="idx">${plotLabel(i)}</div>
+      <div class="swatch" style="background:${FACADE[hash(c.brand+i)%FACADE.length]}"></div>
+      <div class="nm">${esc(c.brand)}<small>${t.ic} ${t.n} · ${districtName(isSouth(i)?southIdx(i):i)}${c.neon?" · neon":""}${c.board?" · billboard":""}</small></div>
+      <div class="amt num">${c.spent} PXT</div></div>`;
+  }).join(""));
+}
+
+/* --- kontrakty --- */
+function openQuests(){
+  rollQuests();
+  panel("KONTRAKTY MIEJSKIE", S.quests.map((q,n) => {
+    const pc = Math.min(100, Math.round(q.prog/q.tgt*100));
+    return `<div class="row" style="animation-delay:${n*30}ms">
+      <div class="idx">${q.done?"✓":pc+"%"}</div>
+      <div class="nm">${esc(questText(q))}
+        <small>${Math.min(q.prog,q.tgt)} / ${q.tgt} · nagroda ${q.pay} PXT</small></div>
+      ${q.done ? `<button class="badge ok" style="padding:6px 10px;cursor:pointer" onclick="claimQuest(${n})">ODBIERZ</button>`
+               : `<span class="badge">W TOKU</span>`}</div>`;
+  }).join("") + `<p class="tiny" style="padding:0 11px 11px">Po odebraniu na miejsce kontraktu wchodzi nowy.</p>`);
+}
+
+/* --- pomoc --- */
+function openHelp(){
+  modal(`<h3>Jak grać</h3>
+    <p class="sub">Dwie pętle, które się napędzają.</p>
+    <div class="kv"><span>1. Bieg</span><b>Zbierasz PXT</b></div>
+    <p class="tiny">Bóbr biegnie sam. <b>Tapnij</b> albo spacja, żeby skoczyć nad autem, koszem czy hydrantem.
+      <b>Przeciągnij w dół</b> albo S, żeby ślizgiem przejść pod barierką i banerem, bo tych przeskoczyć się nie da.
+      Autobus wymaga pełnego skoku. Każda ominięta przeszkoda podbija kombo, a od kombo x3 żetony liczą się podwójnie.</p>
+    <div class="kv"><span>2. Budowa</span><b>PXT pracują</b></div>
+    <p class="tiny">Za PXT stawiasz budynki po stronie zabudowy i lokale po stronie parku. Każdy płaci czynsz co sekundę,
+      także gdy biegniesz. Sąsiedzi dokładają po 8%, zabudowanie 60% dzielnicy daje jej +15%, neon dopłaca nocą,
+      billboard zawsze. Rozbudowa podnosi budynek o poziom.</p>
+    <div class="kv"><span>Doba</span><b>Około trzech minut</b></div>
+    <p class="tiny">Okna zapalają się o zmierzchu, neony grają dopiero nocą, a bieg zaczęty po zmroku płaci półtora raza więcej.</p>
+    <div class="kv"><span>Skróty</span><b>klawiatura</b></div>
+    <p class="tiny">SPACJA skok · S ślizg · R bieg · U ulepszenia · K kontrakty · L ranking · F wolna działka · ESC zamknij</p>
+    <button class="btn go" onclick="closeModal()">JASNE</button>`);
+}
+function firstFree(){
+  const start = Math.max(0, plotAt(W/2));
+  for(let d=0; d<PLOTS; d++){
+    for(const i of [start+d, start-d]){
+      if(i >= 0 && i < PLOTS && !S.plots[i]) return i;
+    }
+  }
+  return 0;
+}
+
+/* ============================================================
+   11. STEROWANIE
+   ============================================================ */
+let drag = null, moved = 0, pinch = null, downY = 0, slid = false;
+cv.addEventListener("pointerdown", e => {
+  cv.setPointerCapture(e.pointerId);
+  downY = e.clientY; slid = false; moved = 0;
+  if(R.on && !R.dead){ runJump(); return; }
+  drag = {x:e.clientX, y:e.clientY, camx:S.cam.x};
+});
+cv.addEventListener("pointermove", e => {
+  if(R.on && !R.dead){
+    if(!slid && e.clientY - downY > 40){ slid = true; runSlide(); }
+    return;
+  }
+  if(!drag) return;
+  const dx = e.clientX - drag.x;
+  moved = Math.max(moved, Math.abs(dx) + Math.abs(e.clientY - drag.y));
+  S.cam.x = drag.camx + dx; clampCam();
+});
+cv.addEventListener("pointerup", e => {
+  if(R.on) { drag = null; return; }
+  if(drag && moved < 8){
+    const i = hitTest(e.clientX, e.clientY);
+    if(i !== null) openPlot(i);
+  }
+  drag = null;
+});
+cv.addEventListener("pointercancel", ()=>{ drag = null; });
+cv.addEventListener("wheel", e => {
+  e.preventDefault();
+  zoomBy(e.deltaY < 0 ? 1.12 : 0.9);
+}, {passive:false});
+cv.addEventListener("touchstart", e => {
+  if(e.touches.length === 2) pinch = dist(e.touches);
+}, {passive:true});
+cv.addEventListener("touchmove", e => {
+  if(e.touches.length === 2 && pinch){
+    const d = dist(e.touches);
+    zoomBy(d/pinch); pinch = d;
+  }
+}, {passive:true});
+cv.addEventListener("touchend", ()=>{ pinch = null; }, {passive:true});
+const dist = t => Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
+function zoomBy(f){
+  const mid = plotAt(W/2);
+  S.cam.z = Math.min(2.0, Math.max(0.55, S.cam.z*f));
+  S.cam.x = W/2 - mid*CELL*S.cam.z;
+  clampCam();
+}
+function hitTest(x, y){
+  for(let i=hits.length-1; i>=0; i--){
+    const h = hits[i];
+    if(x >= h.x && x <= h.x+h.w && y >= h.y && y <= h.y+h.h) return h.i;
+  }
+  return null;
+}
+addEventListener("keydown", e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+  if(typing && e.key !== "Escape") return;
+  const k = e.key.toLowerCase();
+  if(e.code === "Space" || k === "arrowup" || k === "w"){ e.preventDefault(); R.on ? runJump() : null; }
+  else if(k === "s" || k === "arrowdown"){ e.preventDefault(); if(R.on) runSlide(); }
+  else if(k === "r"){ R.on ? runStop() : runStart(); }
+  else if(k === "u"){ openShop(); }
+  else if(k === "k"){ openQuests(); }
+  else if(k === "l"){ openBoard(); }
+  else if(k === "f"){ focusPlot(firstFree()); }
+  else if(k === "h"){ openHelp(); }
+  else if(k === "escape"){ closeModal(); closePanel(); }
+  else if(k === "arrowleft"){ S.cam.x += 120; clampCam(); }
+  else if(k === "arrowright"){ S.cam.x -= 120; clampCam(); }
+});
+$("modal").addEventListener("click", e => { if(e.target.id === "modal") closeModal(); });
+$("rRun").onclick   = ()=> R.on ? runStop() : runStart();
+$("btnRun").onclick = ()=> R.on ? runStop() : runStart();
+$("rExit").onclick  = ()=> { runStop(); closeModal(); };
+$("rShop").onclick  = openShop;
+$("rQuest").onclick = openQuests;
+$("rBoard").onclick = openBoard;
+$("rFree").onclick  = ()=> focusPlot(firstFree());
+$("rHelp").onclick  = openHelp;
+$("btnBuild").onclick = ()=> openBuild(firstFree());
+$("zin").onclick  = ()=> zoomBy(1.18);
+$("zout").onclick = ()=> zoomBy(0.85);
+
+/* ============================================================
+   12. PĘTLA I START
+   ============================================================ */
+let last = performance.now(), tickAcc = 0;
+function loop(now){
+  const dt = Math.min(0.05, (now - last)/1000);
+  last = now;
+  if(S.boot){
+    S.t += dt;
+    S.weatherT -= dt;
+    if(S.weatherT < 0){
+      S.weather = Math.random() < 0.28 ? "rain" : "clear";
+      S.weatherT = 45 + Math.random()*70;
+      if(S.weather === "rain") toast("Nad aleją przechodzi deszcz.", "warn");
+    }
+    const inc = rate()*dt;
+    S.tokens += inc;
+    shownTokens += (S.tokens - shownTokens)*Math.min(1, dt*6);
+    $("hTok").textContent = fmt(shownTokens);
+    tickAcc += dt;
+    if(tickAcc > 6){ tickAcc = 0; hud(); ticker(); }
+    runUpdate(dt, now);
+    draw(dt, now);
+  }
+  requestAnimationFrame(loop);
+}
+
+function bootSequence(){
+  const sky = $("bootSky");
+  const heights = [14,26,20,38,30,46,24,52,18,34,28,42];
+  heights.forEach((h,i) => {
+    const b = document.createElement("i");
+    b.style.height = h + "px";
+    b.style.animationDelay = (i*55) + "ms";
+    if(i % 4 === 1) b.style.background = "#c9f24d";
+    sky.appendChild(b);
+  });
+  const msgs = ["WYLEWANIE ASFALTU","ROZSTAWIANIE LATARNI","WPUSZCZANIE RUCHU",
+                "SADZENIE PARKU","BUDZENIE BOBRA"];
+  let step = 0;
+  const iv = setInterval(()=>{
+    step++;
+    $("bootFill").style.width = Math.min(100, step*20) + "%";
+    $("bootMsg").textContent = msgs[Math.min(step, msgs.length-1)];
+    if(step >= 5){
+      clearInterval(iv);
+      $("bootMsg").textContent = "GOTOWE";
+      $("bootGo").classList.add("show");
+    }
+  }, 230);
+  $("bootGo").onclick = enterCity;
+}
+function enterCity(){
+  $("boot").classList.add("gone");
+  setTimeout(()=> $("boot").style.display = "none", 620);
+  ["hud","dock"].forEach(id => $(id).classList.add("in"));
+  document.querySelector(".rail").classList.add("in");
+  $("zoom").classList.add("in");
+  S.boot = true;
+  if(S.offline) toast("Pod twoją nieobecność aleja zarobiła " + S.offline + " PXT.", "gain");
+  else if(!S.builtCount) toast("Masz 120 PXT na start. Wystarczy na kiosk.", "gain");
+}
+
+function init(){
+  resize();
+  const had = load();
+  rollQuests();
+  seedLife();
+  shownTokens = S.tokens;
+  /* kamera na środku zabudowanej części albo na początku alei */
+  const keys = Object.keys(S.plots).map(Number).filter(i => !isSouth(i));
+  const centre = keys.length ? Math.round(keys.reduce((a,b)=>a+b,0)/keys.length) : 2;
+  S.cam.x = W/2 - centre*CELL*S.cam.z;
+  clampCam();
+  hud(); ticker(); questDot();
+  bootSequence();
+  requestAnimationFrame(loop);
+  if(had) $("bootGo").textContent = "WRÓĆ DO MIASTA";
+  /* pierwsza klatka rysuje się już pod ekranem startowym */
+  draw(0.016, performance.now());
+}
+init();
+
+/* Republikacja strony nie powinna kasować miasta. */
+try{
+  if(window.claude && window.claude.hot && window.claude.hot.snapshot)
+    window.claude.hot.snapshot(()=> ({save:localStorage.getItem(SAVE_KEY)}));
+}catch(e){}
+addEventListener("beforeunload", save);
+setInterval(save, 15000);
+</script>
