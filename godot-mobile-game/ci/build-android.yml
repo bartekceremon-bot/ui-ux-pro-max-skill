@@ -81,6 +81,9 @@ jobs:
       - name: Run gameplay smoke test
         run: godot --headless --path "$PROJECT_DIR" tests/smoke.tscn
 
+      - name: Run UI walk test
+        run: godot --headless --path "$PROJECT_DIR" tests/ui_test.tscn
+
       - name: Export APK
         env:
           GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEYSTORE_USER }}
@@ -97,10 +100,11 @@ jobs:
           fi
           ls -la "$PROJECT_DIR/build"
 
-      - name: Verify signature
+      - name: Verify signature and manifest
         run: |
           "$ANDROID_HOME"/build-tools/34.0.0/apksigner verify --verbose \
             "$PROJECT_DIR/build/PrismRun.apk"
+          python3 "$PROJECT_DIR/tools/check_apk.py" "$PROJECT_DIR/build/PrismRun.apk"
 
       - uses: actions/upload-artifact@v4
         with:

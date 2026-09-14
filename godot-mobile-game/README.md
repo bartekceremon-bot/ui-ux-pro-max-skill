@@ -68,13 +68,27 @@ release build instead of a debug one.
 ## Tests
 
 ```bash
-godot --headless --path . tests/smoke.tscn   # exits non-zero on failure
+godot --headless --path . tests/smoke.tscn     # gameplay loop
+godot --headless --path . tests/ui_test.tscn   # every screen and button
+python3 tools/check_apk.py build/PrismRun.apk  # after an export
 ```
 
-The smoke test boots the gameplay scene and drives it with an autopilot that
-reads the incoming gates, so spawning, the difficulty ramp, collisions and
-scoring are all exercised without a device. `tools/screenshot.tscn` does the
-same under a real renderer and writes the PNGs above.
+All three exit non-zero on failure. The smoke test boots the gameplay scene and
+drives it with an autopilot that reads the incoming gates, so spawning, the
+difficulty ramp, collisions and scoring are exercised without a device. The UI
+test walks every screen, presses every button and feeds real touch and key
+events into a live run. `tools/check_apk.py` inspects the exported package.
+`tools/screenshot.tscn` renders the PNGs above under a real renderer.
+
+### One pitfall worth knowing
+
+Godot 4.4's Android runtime calls `Vibrator.vibrate()` without catching
+`SecurityException`, and its internal permission check returns true for VIBRATE
+even when the manifest does not declare it, because VIBRATE is a normal rather
+than a dangerous permission. An APK exported without `permissions/vibrate=true`
+therefore dies the first time the player taps. Newer Godot builds catch it. The
+preset here sets the flag and `tools/check_apk.py` fails the build if it is ever
+dropped.
 
 ## Layout
 

@@ -30,12 +30,18 @@ echo "==> Importing resources"
 echo "==> Running the gameplay smoke test"
 "$GODOT" --headless --path . tests/smoke.tscn
 
+echo "==> Running the UI walk test"
+"$GODOT" --headless --path . tests/ui_test.tscn
+
 echo "==> Exporting ($MODE)"
 if [ "$MODE" = "release" ]; then
 	"$GODOT" --headless --path . --export-release "Android" "$OUT"
 else
 	"$GODOT" --headless --path . --export-debug "Android" "$OUT"
 fi
+
+echo "==> Checking the built APK"
+python3 tools/check_apk.py "$OUT"
 
 echo "==> Done: $PROJECT_DIR/$OUT"
 ls -lh "$OUT"
