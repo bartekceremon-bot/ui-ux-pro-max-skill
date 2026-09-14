@@ -19,7 +19,7 @@ export function Logistics(): JSX.Element {
     <section id="logistyka" className={`section-dark ${styles.section}`}>
       <div className="container" ref={ref}>
         <SectionHead
-          index="06"
+          index="04"
           kicker="Logistyka"
           title="Droga palety"
           lede="Paleta → magazyn → transport → klient. Terminy i dostępność ustalamy przy zamówieniu."

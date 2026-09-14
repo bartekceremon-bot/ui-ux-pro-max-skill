@@ -7,7 +7,7 @@
 .canvasWrap {
   position: relative;
   aspect-ratio: 16 / 11;
-  border: 1px solid var(--line-light);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: #1b1a17;
@@ -21,8 +21,8 @@
 
 .controls :global(.btn) {
   background: rgba(19, 18, 16, 0.72);
-  color: var(--text-on-dark);
-  border-color: var(--line-dark-strong);
+  color: var(--text-main);
+  border-color: var(--line-strong);
   backdrop-filter: blur(6px);
   padding: 0.75rem 1.3rem;
 }
@@ -33,7 +33,7 @@
 }
 
 .panel {
-  border: 1px solid var(--line-light);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: var(--space-3);
   background: var(--warm-white);
@@ -56,7 +56,7 @@
 }
 
 .panelInfo {
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
   font-size: 0.95rem;
 }
 
@@ -91,7 +91,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
 }
 
 .legend li::before {
@@ -104,11 +104,11 @@
   margin-top: 0.4rem;
   background: none;
   border: none;
-  border-bottom: 1px solid var(--line-light-strong);
+  border-bottom: 1px solid var(--line-strong);
   padding: 0 0 2px;
   font-size: 0.85rem;
   cursor: pointer;
-  color: var(--text-on-light);
+  color: var(--text-main);
 }
 
 .clear:hover {

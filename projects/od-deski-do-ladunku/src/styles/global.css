@@ -28,7 +28,7 @@ html {
 body {
   margin: 0;
   background: var(--ink);
-  color: var(--text-on-dark);
+  color: var(--text-main);
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.65;
@@ -50,13 +50,12 @@ h4 {
 h1 {
   font-size: var(--text-hero);
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: -0.035em;
 }
 
 h2 {
   font-size: var(--text-3xl);
-  text-transform: uppercase;
+  letter-spacing: -0.03em;
 }
 
 h3 {
@@ -102,12 +101,12 @@ button {
 /* --- section framework -------------------------------------------------------------------- */
 .section-dark {
   background: var(--ink);
-  color: var(--text-on-dark);
+  color: var(--text-main);
 }
 
-.section-light {
-  background: var(--paper);
-  color: var(--text-on-light);
+.section-alt {
+  background: var(--surface-raised);
+  color: var(--text-main);
 }
 
 .eyebrow {
@@ -119,18 +118,10 @@ button {
   color: var(--wood-light);
 }
 
-.section-light .eyebrow {
-  color: var(--wood-dark);
-}
-
 .lede {
   font-size: var(--text-lg);
   max-width: 46ch;
-  color: var(--text-on-dark-dim);
-}
-
-.section-light .lede {
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
 }
 
 /* --- buttons ------------------------------------------------------------------------------- */
@@ -165,33 +156,24 @@ button {
 }
 
 .btn-primary {
-  background: var(--wood);
-  color: #1a1207;
+  background: var(--gold);
+  color: #171004;
 }
 
 .btn-primary:hover {
-  background: var(--wood-light);
+  background: var(--gold-bright);
 }
 
+/* The reference pairs the gold fill with a solid dark chip, not an outline-only ghost. */
 .btn-ghost {
-  background: transparent;
-  color: var(--text-on-dark);
-  border-color: var(--line-dark-strong);
+  background: rgba(10, 9, 8, 0.72);
+  color: var(--text-main);
+  border-color: var(--line-strong);
 }
 
 .btn-ghost:hover {
   border-color: var(--wood-light);
   color: var(--wood-light);
-}
-
-.section-light .btn-ghost {
-  color: var(--text-on-light);
-  border-color: var(--line-light-strong);
-}
-
-.section-light .btn-ghost:hover {
-  border-color: var(--wood-dark);
-  color: var(--wood-dark);
 }
 
 /* --- utility -------------------------------------------------------------------------------- */

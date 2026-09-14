@@ -4,6 +4,8 @@ import type { SceneMaterials } from './materials';
 
 export type StudioModel = {
   group: THREE.Group;
+  /** The infinity-curve backdrop, exposed so an embedded product shot can drop it. */
+  cyclorama: THREE.Mesh;
   /** Scene 01: raw sawn timber, cleared as the boards take over. */
   updateTimber: (present: number) => void;
   /** Keeps the contact shadow under the product as it is lifted off the ground. */
@@ -76,6 +78,7 @@ export function buildStudio(materials: SceneMaterials): StudioModel {
 
   const cyclorama = new THREE.Mesh(cycloramaGeometry(30, 9, 2.6, 3.2, 9), materials.floor);
   cyclorama.receiveShadow = true;
+  cyclorama.name = 'cyclorama';
   group.add(cyclorama);
 
   const shadowMaterial = new THREE.MeshBasicMaterial({
@@ -134,5 +137,5 @@ export function buildStudio(materials: SceneMaterials): StudioModel {
   updateTimber(1);
   updateGrounding(0);
 
-  return { group, updateTimber, updateGrounding };
+  return { group, cyclorama, updateTimber, updateGrounding };
 }

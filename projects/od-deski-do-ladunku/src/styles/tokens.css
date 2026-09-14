@@ -1,31 +1,31 @@
 :root {
   /* Industrial premium: drewno, stal, beton, magazyn, światło studyjne */
-  --ink: #121110;
-  --ink-raised: #191817;
-  --steel: #1c1b18;
-  --concrete: #262420;
-  --concrete-soft: #3a3733;
-  --paper: #f7f3ec;
-  --paper-raised: #fffdf8;
-  --warm-white: #efe9de;
-  --sand: #e3dbcd;
+  --ink: #0d0c0b;
+  --ink-raised: #131211;
+  --steel: #1a1917;
+  --concrete: #22201d;
+  --concrete-soft: #35322d;
+
+  /* One dark system, two surfaces. Sections alternate between them so the page has tonal
+     rhythm without ever going to a light ground -- the art direction is a lit workshop at night. */
+  --surface-alt: #121110;
+  --surface-raised: #1a1816;
 
   --wood: #b8834a;
   --wood-light: #dcb383;
   --wood-dark: #7a5326;
+  /* Filled CTAs and the active marker: brighter than the accent wood so a button reads as a
+     button against the wood-toned photography behind it. */
+  --gold: #dfae6a;
+  --gold-bright: #f0c78d;
   --moss: #5c6b4a;
 
-  --text-on-dark: #f2ede4;
-  --text-on-dark-dim: rgba(242, 237, 228, 0.66);
-  --text-on-dark-faint: rgba(242, 237, 228, 0.42);
-  --text-on-light: #1a1917;
-  --text-on-light-dim: rgba(26, 25, 23, 0.68);
-  --text-on-light-faint: rgba(26, 25, 23, 0.45);
+  --text-main: #f3efe8;
+  --text-dim: rgba(243, 239, 232, 0.62);
+  --text-faint: rgba(243, 239, 232, 0.38);
 
-  --line-dark: rgba(242, 237, 228, 0.13);
-  --line-dark-strong: rgba(242, 237, 228, 0.3);
-  --line-light: rgba(26, 25, 23, 0.11);
-  --line-light-strong: rgba(26, 25, 23, 0.24);
+  --line: rgba(243, 239, 232, 0.1);
+  --line-strong: rgba(243, 239, 232, 0.26);
 
   --font-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

@@ -21,10 +21,10 @@ export function Spec(): JSX.Element {
   const can3D = useCanRender3D();
 
   return (
-    <section id="specyfikacja" className={`section-light ${styles.section}`}>
+    <section id="specyfikacja" className={`section-alt ${styles.section}`}>
       <div className="container" ref={ref}>
         <SectionHead
-          index="05"
+          index="03"
           kicker="Specyfikacja"
           title="Paleta rozłożona na części"
           lede={`Model odpowiada konstrukcji, którą produkujemy: ${PARTS.length} elementów i połączenia. Kliknij element, żeby zobaczyć jego rolę.`}

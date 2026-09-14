@@ -32,6 +32,8 @@ export function JourneyScene(): JSX.Element {
   const forklift = useMemo(() => buildForklift(materials), [materials]);
   /** Pallet and load ride up together on the forks; the truck lifts its own carriage. */
   const liftGroup = useMemo(() => new THREE.Group(), []);
+  /** Scratch vector for the camera pan, allocated once rather than per frame. */
+  const pan = useMemo(() => new THREE.Vector3(), []);
 
   useEffect(() => {
     const group = root.current;
@@ -47,6 +49,7 @@ export function JourneyScene(): JSX.Element {
   useFrame((state) => {
     if (import.meta.env.DEV) {
       // Draw-call budget probe for local profiling; stripped from production builds.
+      (window as unknown as { __pallet?: unknown }).__pallet = pallet;
       (window as unknown as { __sceneInfo?: unknown }).__sceneInfo = {
         calls: state.gl.info.render.calls,
         triangles: state.gl.info.render.triangles,
@@ -57,9 +60,26 @@ export function JourneyScene(): JSX.Element {
     const t = scrollState.t;
     const phases = phasesAt(t);
 
-    const shot = sampleCamera(t);
+    let shot = sampleCamera(t);
+    if (import.meta.env.DEV) {
+      // Camera framing rig: set window.__camOverride from the console (or a screenshot script) to
+      // try a keyframe without a rebuild. Stripped from production builds.
+      const override = (window as unknown as { __camOverride?: typeof shot }).__camOverride;
+      if (override) shot = override;
+    }
     camera.position.set(...shot.position);
     camera.lookAt(...shot.target);
+    // Horizontal pan: slide camera and look-at together along the camera's right axis, so the
+    // subject moves across the frame without the viewing angle changing.
+    if (shot.shift) {
+      pan.set(...shot.target).sub(camera.position).normalize().cross(camera.up).normalize();
+      camera.position.addScaledVector(pan, shot.shift);
+      camera.lookAt(
+        shot.target[0] + pan.x * shot.shift,
+        shot.target[1] + pan.y * shot.shift,
+        shot.target[2] + pan.z * shot.shift,
+      );
+    }
     if ((camera as THREE.PerspectiveCamera).isPerspectiveCamera) {
       const perspective = camera as THREE.PerspectiveCamera;
       if (perspective.fov !== shot.fov) {

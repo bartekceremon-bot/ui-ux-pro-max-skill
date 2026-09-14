@@ -40,10 +40,10 @@ export function Quality(): JSX.Element {
   const active = STAGES.find((stage) => stage.id === activeId)!;
 
   return (
-    <section id="jakosc" className={`section-light ${styles.section}`}>
+    <section id="jakosc" className={`section-alt ${styles.section}`}>
       <div className="container" ref={ref}>
         <SectionHead
-          index="04"
+          index="02"
           kicker="Jakość"
           title="Cztery punkty kontroli"
           lede="Materiał → produkcja → kontrola → gotowy produkt. Wybierz etap, żeby zobaczyć, co sprawdzamy."

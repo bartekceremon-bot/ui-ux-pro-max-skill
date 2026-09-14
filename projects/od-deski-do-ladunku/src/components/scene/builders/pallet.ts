@@ -27,6 +27,17 @@ export type PalletModel = {
 };
 
 const EXPLODE_SCALE = 0.34;
+
+/**
+ * How far each kind of part is lifted in the *staging* pose the journey opens on.
+ *
+ * A full symmetric explosion scatters twenty parts into something you have to decode. The pose
+ * that reads instantly — and the one the art direction asks for — is a pallet whose base is
+ * already standing with its deck floating off it, so the weights fall away sharply from the deck
+ * downwards. The spec viewer's exploded view is unaffected: that one still uses the full
+ * `explodeDir` on top of the rest pose.
+ */
+const STAGE_WEIGHT: Record<string, number> = { bottom: 0, block: 0, stringer: 0.45, top: 1 };
 const STAGGER = 0.55;
 
 function clamp01(x: number) {
@@ -110,10 +121,11 @@ export function buildPallet(materials: SceneMaterials, seed = 1): PalletModel {
   const update = ({ boards, components: componentsPhase, assembly }: PalletPhases) => {
     parts.forEach(({ part, mesh }) => {
       const isDeck = Boolean(part.align);
+      const stage = EXPLODE_SCALE * (STAGE_WEIGHT[part.kind] ?? 1);
       const explodePose: [number, number, number] = [
-        part.rest[0] + part.explodeDir[0] * EXPLODE_SCALE,
-        part.rest[1] + part.explodeDir[1] * EXPLODE_SCALE,
-        part.rest[2] + part.explodeDir[2] * EXPLODE_SCALE,
+        part.rest[0] + part.explodeDir[0] * stage,
+        part.rest[1] + part.explodeDir[1] * stage,
+        part.rest[2] + part.explodeDir[2] * stage,
       ];
 
       let px: number;

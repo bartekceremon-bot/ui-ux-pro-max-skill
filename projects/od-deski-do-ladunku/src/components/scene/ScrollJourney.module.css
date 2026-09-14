@@ -60,35 +60,34 @@
 }
 
 .hero {
-  padding-inline: var(--gutter);
-  max-width: min(64rem, 100%);
+  padding-inline: clamp(1.25rem, 5vw, 5.5rem);
+  max-width: min(52rem, 100%);
   pointer-events: auto;
 }
 
 .heroEyebrow {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--wood-light);
-  margin-bottom: 1.1rem;
+  color: var(--text-dim);
+  margin-bottom: 1.4rem;
 }
 
 .heroTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: -0.035em;
-  line-height: 0.92;
-  font-size: clamp(3rem, 9vw, 8rem);
-  color: var(--text-on-dark);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  font-size: clamp(2.9rem, 7vw, 6.2rem);
+  color: var(--text-main);
   margin: 0 0 1.4rem;
   text-shadow: 0 4px 44px rgba(0, 0, 0, 0.6);
 }
 
 .heroLede {
   font-size: clamp(1rem, 1.4vw, 1.2rem);
-  color: var(--text-on-dark-dim);
+  color: var(--text-dim);
   max-width: 34ch;
   margin-bottom: var(--space-3);
 }
@@ -157,7 +156,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: -0.02em;
-  color: var(--text-on-dark);
+  color: var(--text-main);
   margin: 0;
   text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55);
 }
@@ -176,8 +175,77 @@
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-on-dark-dim);
-  border: 1px solid var(--line-dark);
+  color: var(--text-dim);
+  border: 1px solid var(--line);
   border-radius: 999px;
   padding: 0.34rem 0.78rem;
+}
+
+/* --- beat counter rail ---------------------------------------------------------------------- */
+/* The reference's "01 / 08" slide counter. Here it counts the seven beats of the scroll story,
+   so the reader always knows how far through the build they are. */
+.rail {
+  position: absolute;
+  top: 50%;
+  right: clamp(1rem, 2.6vw, 2.4rem);
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.railCount {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin: 0;
+  font-family: var(--font-display);
+}
+
+.railCurrent {
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.railTotal {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+.railLine {
+  width: 1px;
+  height: 3.2rem;
+  background: linear-gradient(180deg, var(--line-strong), transparent);
+}
+
+.railDots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.railDots li {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--line-strong);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.railDots li.railDotOn {
+  background: var(--gold);
+  transform: scale(1.6);
+}
+
+@media (min-width: 1024px) {
+  .rail {
+    display: flex;
+  }
 }

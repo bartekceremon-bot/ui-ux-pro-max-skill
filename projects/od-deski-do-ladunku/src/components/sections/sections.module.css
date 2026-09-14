@@ -9,12 +9,12 @@
   display: grid;
   gap: var(--space-2);
   padding-top: var(--space-3);
-  border-top: 1px solid var(--line-light);
+  border-top: 1px solid var(--line);
   margin-bottom: var(--space-5);
 }
 
 :global(.section-dark) .head {
-  border-color: var(--line-dark);
+  border-color: var(--line);
 }
 
 .headMeta {
@@ -32,11 +32,11 @@
 }
 
 .headKicker {
-  color: var(--text-on-light-faint);
+  color: var(--text-faint);
 }
 
 :global(.section-dark) .headKicker {
-  color: var(--text-on-dark-faint);
+  color: var(--text-faint);
 }
 
 .headMain h2 {
@@ -49,12 +49,12 @@
 
 .headAside {
   font-size: var(--text-sm);
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
   max-width: 34ch;
 }
 
 :global(.section-dark) .headAside {
-  color: var(--text-on-dark-dim);
+  color: var(--text-dim);
 }
 
 @media (min-width: 900px) {
@@ -80,7 +80,7 @@
    Credentials band
    ============================================================================================= */
 .band {
-  border-block: 1px solid var(--line-dark);
+  border-block: 1px solid var(--line);
   background: var(--ink-raised);
 }
 
@@ -91,8 +91,8 @@
 
 .bandItem {
   padding: var(--space-3) var(--space-2);
-  border-right: 1px solid var(--line-dark);
-  border-bottom: 1px solid var(--line-dark);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .bandItem:nth-child(2n) {
@@ -108,7 +108,7 @@
   font-size: var(--text-2xl);
   font-weight: 600;
   letter-spacing: -0.025em;
-  color: var(--text-on-dark);
+  color: var(--text-main);
   display: block;
 }
 
@@ -117,7 +117,7 @@
   font-size: var(--text-xs);
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--text-on-dark-faint);
+  color: var(--text-faint);
   margin-top: 0.5rem;
   display: block;
 }
@@ -131,7 +131,7 @@
     padding: var(--space-4) var(--space-3);
   }
   .bandItem:nth-child(2n) {
-    border-right: 1px solid var(--line-dark);
+    border-right: 1px solid var(--line);
   }
   .bandItem:last-child {
     border-right: none;
@@ -154,12 +154,12 @@
   gap: var(--space-2);
   align-items: start;
   padding-block: var(--space-3);
-  border-top: 1px solid var(--line-light);
+  border-top: 1px solid var(--line);
   transition: background-color 0.4s ease;
 }
 
 .step:last-child {
-  border-bottom: 1px solid var(--line-light);
+  border-bottom: 1px solid var(--line);
 }
 
 .step:hover {
@@ -183,7 +183,7 @@
   top: 2rem;
   bottom: -2.2rem;
   width: 1px;
-  background: var(--line-light-strong);
+  background: var(--line-strong);
 }
 
 .step:last-child .stepNumber::before {
@@ -195,7 +195,7 @@
 }
 
 .stepText {
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
   max-width: 54ch;
   font-size: 0.97rem;
 }
@@ -217,13 +217,13 @@
 .cards {
   display: grid;
   gap: 1px;
-  background: var(--line-light);
-  border: 1px solid var(--line-light);
+  background: var(--line);
+  border: 1px solid var(--line);
   grid-template-columns: minmax(0, 1fr);
 }
 
 .card {
-  background: var(--paper-raised);
+  background: var(--surface-raised);
   padding: var(--space-3);
   display: flex;
   flex-direction: column;
@@ -282,7 +282,7 @@
 }
 
 .cardText {
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
   font-size: 0.95rem;
   flex: 1;
 }
@@ -292,8 +292,8 @@
   font-size: var(--text-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-on-light-faint);
-  border-top: 1px solid var(--line-light);
+  color: var(--text-faint);
+  border-top: 1px solid var(--line);
   padding-top: 0.8rem;
 }
 
@@ -315,8 +315,8 @@
 .photoGrid {
   display: grid;
   gap: 1px;
-  background: var(--line-dark);
-  border: 1px solid var(--line-dark);
+  background: var(--line);
+  border: 1px solid var(--line);
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -336,7 +336,7 @@
   content: '';
   position: absolute;
   inset: 0.8rem;
-  border: 1px dashed var(--line-dark-strong);
+  border: 1px dashed var(--line-strong);
   pointer-events: none;
 }
 
@@ -349,7 +349,7 @@
   place-items: center;
   font-family: var(--font-mono);
   font-size: 1.6rem;
-  color: var(--line-dark-strong);
+  color: var(--line-strong);
   pointer-events: none;
 }
 
@@ -359,13 +359,13 @@
   font-size: var(--text-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-on-dark);
+  color: var(--text-main);
   position: relative;
 }
 
 .photoHint {
   font-size: var(--text-xs);
-  color: var(--text-on-dark-faint);
+  color: var(--text-faint);
   position: relative;
 }
 
@@ -413,7 +413,7 @@
   height: 100%;
   text-align: left;
   background: none;
-  border: 1px solid var(--line-light);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: var(--space-2);
   cursor: pointer;
@@ -426,7 +426,7 @@
 
 .chainButton:hover {
   transform: translateY(-3px);
-  border-color: var(--line-light-strong);
+  border-color: var(--line-strong);
 }
 
 .chainButton[aria-pressed='true'] {
@@ -454,7 +454,7 @@
   border-left: 2px solid var(--wood);
   padding-left: var(--space-2);
   max-width: 54ch;
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
 }
 
 .chainDetail ul {
@@ -467,11 +467,11 @@
 }
 
 .chainDark .chainButton {
-  border-color: var(--line-dark);
+  border-color: var(--line);
 }
 
 .chainDark .chainButton:hover {
-  border-color: var(--line-dark-strong);
+  border-color: var(--line-strong);
 }
 
 .chainDark .chainStage {
@@ -484,7 +484,7 @@
 }
 
 .chainDark .chainDetail {
-  color: var(--text-on-dark-dim);
+  color: var(--text-dim);
 }
 
 @media (min-width: 900px) {
@@ -507,14 +507,14 @@
 }
 
 .faq {
-  border-top: 1px solid var(--line-light);
+  border-top: 1px solid var(--line);
 }
 
 .faqAside {
-  border: 1px solid var(--line-light);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: var(--space-3);
-  background: var(--paper-raised);
+  background: var(--surface-raised);
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -530,7 +530,7 @@
 
 .faqAsideText {
   font-size: 0.94rem;
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
 }
 
 @media (min-width: 1000px) {
@@ -541,7 +541,7 @@
 }
 
 .faqItem {
-  border-bottom: 1px solid var(--line-light);
+  border-bottom: 1px solid var(--line);
 }
 
 .faqButton {
@@ -582,7 +582,7 @@
 .faqAnswer {
   padding-bottom: var(--space-3);
   max-width: 62ch;
-  color: var(--text-on-light-dim);
+  color: var(--text-dim);
 }
 
 /* =============================================================================================
@@ -591,7 +591,7 @@
 .contact {
   padding-block: var(--space-6);
   background: linear-gradient(160deg, #16150f 0%, #221d17 48%, #3a2a18 130%);
-  border-top: 1px solid var(--line-dark);
+  border-top: 1px solid var(--line);
 }
 
 .contactGrid {
@@ -618,7 +618,7 @@
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   letter-spacing: 0.06em;
-  color: var(--text-on-dark-dim);
+  color: var(--text-dim);
 }
 
 .contactList span {
@@ -630,7 +630,7 @@
   display: grid;
   gap: var(--space-2);
   background: rgba(18, 17, 16, 0.55);
-  border: 1px solid var(--line-dark);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: var(--space-3);
 }
@@ -651,7 +651,7 @@
   font-size: var(--text-xs);
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--text-on-dark-faint);
+  color: var(--text-faint);
 }
 
 .field input,
@@ -659,9 +659,9 @@
 .field textarea {
   font-family: var(--font-body);
   font-size: 0.95rem;
-  color: var(--text-on-dark);
+  color: var(--text-main);
   background: rgba(242, 237, 228, 0.04);
-  border: 1px solid var(--line-dark-strong);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
   padding: 0.75rem 0.85rem;
   transition: border-color 0.25s ease, background-color 0.25s ease;
@@ -682,12 +682,12 @@
 
 .field select option {
   background: var(--ink);
-  color: var(--text-on-dark);
+  color: var(--text-main);
 }
 
 .formNote {
   font-size: var(--text-xs);
-  color: var(--text-on-dark-faint);
+  color: var(--text-faint);
 }
 
 .formActions {
@@ -713,7 +713,7 @@
 .contactArt {
   margin-top: var(--space-4);
   padding: var(--space-2);
-  border: 1px solid var(--line-dark);
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: radial-gradient(ellipse at 50% 80%, rgba(184, 131, 74, 0.14), rgba(12, 11, 10, 0.7) 70%);
 }
@@ -730,5 +730,408 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
     gap: var(--space-5);
     align-items: start;
+  }
+}
+
+/* =============================================================================================
+   Production rail (process)
+   ============================================================================================= */
+.processBand {
+  background: var(--ink);
+  border-block: 1px solid var(--line);
+  padding-block: var(--space-5);
+}
+
+.processInner {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.processTitle {
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  margin-top: 0.9rem;
+  line-height: 1.05;
+}
+
+.processRailWrap {
+  display: grid;
+  gap: var(--space-3);
+  align-content: center;
+}
+
+/* The rail scrolls sideways below the desktop width rather than wrapping: seven numbered stops
+   in two ragged rows stop reading as one production line. */
+.processRail {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.4rem;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.processRail::-webkit-scrollbar {
+  display: none;
+}
+
+.processStop {
+  flex: 1 0 7.2rem;
+  position: relative;
+}
+
+/* The connector: drawn from each stop's dot to the next one, so the line never overshoots. */
+.processStop:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 1.15rem;
+  left: calc(50% + 1.35rem);
+  right: calc(-50% + 1.35rem);
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.stopButton {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: color 0.25s ease;
+}
+
+.stopDot {
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  transition: border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stopLabel {
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.stopButton:hover .stopDot {
+  border-color: var(--gold);
+  color: var(--text-main);
+}
+
+.stopOn {
+  color: var(--gold);
+}
+
+.stopOn .stopDot {
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(223, 174, 106, 0.1);
+}
+
+.processDetail {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  max-width: 62ch;
+}
+
+.processDetailStep {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 0.4rem;
+}
+
+@media (min-width: 1000px) {
+  .processInner {
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: center;
+  }
+}
+
+/* =============================================================================================
+   Offer: copy, product stage and the type list, the way the reference lays it out
+   ============================================================================================= */
+.offer {
+  background: var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.offerGrid {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6) clamp(1.25rem, 4vw, 3.4rem);
+}
+
+.offerTitle {
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  margin-top: 0.9rem;
+}
+
+.offerLede {
+  margin: 1.1rem 0 var(--space-3);
+  max-width: 34ch;
+}
+
+.features {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.features li {
+  display: grid;
+  gap: 0.7rem;
+  padding-right: 1rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-dim);
+}
+
+.features li + li {
+  border-left: 1px solid var(--line);
+  padding-left: 1.1rem;
+}
+
+.featureIcon {
+  color: var(--text-dim);
+}
+
+/* --- product stage -------------------------------------------------------------------------- */
+.offerStage {
+  position: relative;
+  margin: 0;
+  min-height: 22rem;
+  display: grid;
+  align-content: stretch;
+  background: radial-gradient(ellipse at 50% 72%, rgba(184, 131, 74, 0.12), rgba(8, 8, 7, 0) 68%);
+}
+
+.offerStageFallback {
+  min-height: 22rem;
+  background: radial-gradient(ellipse at 50% 70%, rgba(184, 131, 74, 0.1), transparent 70%);
+}
+
+.offerCaption {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  text-align: center;
+  padding-top: 0.8rem;
+}
+
+/* --- type list ------------------------------------------------------------------------------ */
+.typeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-self: center;
+  border-top: 1px solid var(--line);
+}
+
+.typeList li {
+  border-bottom: 1px solid var(--line);
+}
+
+.typeRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.85rem 0.9rem 0.85rem 0;
+  background: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: background-color 0.25s ease, border-color 0.25s ease, padding-left 0.25s ease;
+}
+
+.typeRow:hover {
+  background: rgba(243, 239, 232, 0.03);
+}
+
+.typeRowOn {
+  border-left-color: var(--gold);
+  background: rgba(223, 174, 106, 0.06);
+  padding-left: 0.9rem;
+}
+
+.typeThumb {
+  flex: 0 0 auto;
+  width: 3.4rem;
+  display: grid;
+  place-items: center;
+  opacity: 0.85;
+}
+
+.typeRowOn .typeThumb {
+  opacity: 1;
+}
+
+.typeText {
+  display: grid;
+  gap: 0.2rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.typeName {
+  font-size: 0.9rem;
+}
+
+.typeDims {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.typeArrow {
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  transition: transform 0.3s var(--ease-industrial), color 0.25s ease;
+}
+
+.typeRow:hover .typeArrow,
+.typeRowOn .typeArrow {
+  color: var(--gold);
+  transform: translateX(4px);
+}
+
+.offerNote {
+  font-size: 0.92rem;
+  color: var(--text-dim);
+  max-width: 60ch;
+}
+
+@media (min-width: 900px) {
+  .offerStage {
+    min-height: 30rem;
+  }
+}
+
+@media (min-width: 1100px) {
+  .offerGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 0.95fr);
+    grid-template-areas:
+      'intro stage list'
+      'note  stage list';
+    align-items: start;
+    gap: var(--space-4) var(--space-5);
+  }
+
+  .offerIntro {
+    grid-area: intro;
+  }
+
+  .offerStage {
+    grid-area: stage;
+    min-height: 34rem;
+  }
+
+  .typeList {
+    grid-area: list;
+  }
+
+  .offerNote {
+    grid-area: note;
+    align-self: end;
+  }
+}
+
+/* =============================================================================================
+   Material: split panel, render on one side and the copy on the other
+   ============================================================================================= */
+.material {
+  background: var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.materialGrid {
+  display: grid;
+}
+
+.materialStage,
+.materialFallback {
+  min-height: 20rem;
+  background: radial-gradient(ellipse at 45% 60%, rgba(184, 131, 74, 0.18), rgba(8, 8, 7, 0.9) 72%);
+}
+
+.materialBody {
+  padding: var(--space-5) clamp(1.25rem, 4vw, 3.4rem);
+  align-self: center;
+}
+
+.materialTitle {
+  font-size: clamp(1.9rem, 3vw, 2.7rem);
+  margin-top: 0.9rem;
+  line-height: 1.06;
+}
+
+.materialLede {
+  margin: 1.2rem 0 var(--space-3);
+  max-width: 42ch;
+}
+
+.materialPoints {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  max-width: 46ch;
+}
+
+.materialPoints li {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  color: var(--text-dim);
+}
+
+.materialPoints strong {
+  display: block;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.15rem;
+}
+
+.materialPointIndex {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  padding-top: 0.2rem;
+}
+
+@media (min-width: 900px) {
+  .materialGrid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .materialStage,
+  .materialFallback {
+    min-height: 32rem;
   }
 }

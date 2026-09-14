@@ -1,5 +1,5 @@
+import { useState } from 'react';
 import { useReveal } from '../../hooks/useReveal';
-import { SectionHead } from './SectionHead';
 import styles from './sections.module.css';
 
 const STEPS = [
@@ -12,27 +12,53 @@ const STEPS = [
   { n: '07', title: 'Załadunek', text: 'Wydanie towaru i załadunek transportu.' },
 ];
 
+/**
+ * The horizontal production rail. It is the page's table of contents for the process: seven
+ * numbered stops on one line, the way a plant lays out its own line. Each stop is a button, so
+ * the rail is also the control for the detail underneath — the static version of this graphic
+ * makes the reader guess what "Kontrola" means, this one answers it.
+ */
 export function Process(): JSX.Element {
   const ref = useReveal<HTMLDivElement>();
+  const [active, setActive] = useState(0);
+  const step = STEPS[active];
+
   return (
-    <section id="proces" className={`section-light ${styles.section}`}>
-      <div className="container" ref={ref}>
-        <SectionHead
-          index="01"
-          kicker="Nasz proces"
-          title="Siedem etapów, jedna linia"
-          lede="Od przyjęcia surowca po załadunek. Każdy etap ma swój moment kontroli."
-          aside={<p>Terminy realizacji zależą od typu palety i wielkości zamówienia.</p>}
-        />
-        <ol className={styles.timeline}>
-          {STEPS.map((step) => (
-            <li key={step.n} className={`${styles.step} reveal`}>
-              <span className={styles.stepNumber}>{step.n}</span>
-              <h3 className={styles.stepTitle}>{step.title}</h3>
-              <p className={styles.stepText}>{step.text}</p>
-            </li>
-          ))}
-        </ol>
+    <section id="proces" className={styles.processBand}>
+      <div className={`container ${styles.processInner}`} ref={ref}>
+        <div className={`${styles.processIntro} reveal`}>
+          <p className="eyebrow">Nasz proces</p>
+          <h2 className={styles.processTitle}>
+            Z drewna
+            <br />
+            powstaje paleta.
+          </h2>
+        </div>
+
+        <div className={`${styles.processRailWrap} reveal reveal-delay-1`}>
+          <ol className={styles.processRail}>
+            {STEPS.map((item, index) => (
+              <li key={item.n} className={styles.processStop}>
+                <button
+                  type="button"
+                  className={index === active ? `${styles.stopButton} ${styles.stopOn}` : styles.stopButton}
+                  aria-pressed={index === active}
+                  onClick={() => setActive(index)}
+                >
+                  <span className={styles.stopDot}>{item.n}</span>
+                  <span className={styles.stopLabel}>{item.title}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+
+          <p className={styles.processDetail} aria-live="polite">
+            <span className={styles.processDetailStep}>
+              {step.n} — {step.title}
+            </span>
+            {step.text}
+          </p>
+        </div>
       </div>
     </section>
   );

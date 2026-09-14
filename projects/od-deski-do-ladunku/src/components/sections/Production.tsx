@@ -16,7 +16,7 @@ export function Production(): JSX.Element {
     <section id="produkcja" className={`section-dark ${styles.section}`}>
       <div className="container" ref={ref}>
         <SectionHead
-          index="03"
+          index="01"
           kicker="Produkcja"
           title="Zaplecze"
           lede="Miejsce na zdjęcia z hali. Podmieniamy je na materiał [FIRMA] przed publikacją."

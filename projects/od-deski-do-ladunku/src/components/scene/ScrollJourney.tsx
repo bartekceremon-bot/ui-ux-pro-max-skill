@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MobileFallback } from './MobileFallback';
 import { useActiveBeat } from './useActiveBeat';
+import { BEATS } from './journeyConfig';
 import { setScrollProgress, subscribeScroll } from './scrollStore';
 import { useCanRender3D, useReducedMotion } from '../../hooks/usePreferences';
 import styles from './ScrollJourney.module.css';
@@ -30,8 +31,8 @@ function Hero({ overlay }: { overlay: boolean }): JSX.Element {
         <a href="#proces" className="btn btn-primary">
           Zobacz proces
         </a>
-        <a href="#kontakt" className="btn btn-ghost">
-          Zapytaj o ofertę
+        <a href="#produkty" className="btn btn-ghost">
+          Poznaj ofertę
         </a>
       </div>
     </div>
@@ -46,6 +47,7 @@ export function ScrollJourney(): JSX.Element {
   const can3D = useCanRender3D();
   const reducedMotion = useReducedMotion();
   const beat = useActiveBeat();
+  const beatIndex = Math.max(0, BEATS.findIndex((item) => item.id === beat.id));
   const [progress, setProgress] = useState(0);
   const [active, setActive] = useState(false);
 
@@ -117,6 +119,19 @@ export function ScrollJourney(): JSX.Element {
 
           <div className={styles.heroSlot} ref={heroRef}>
             <Hero overlay />
+          </div>
+
+          <div className={styles.rail} aria-hidden="true">
+            <p className={styles.railCount}>
+              <span className={styles.railCurrent}>{String(beatIndex + 1).padStart(2, '0')}</span>
+              <span className={styles.railTotal}>/ {String(BEATS.length).padStart(2, '0')}</span>
+            </p>
+            <span className={styles.railLine} />
+            <ul className={styles.railDots}>
+              {BEATS.map((item, index) => (
+                <li key={item.id} className={index === beatIndex ? styles.railDotOn : undefined} />
+              ))}
+            </ul>
           </div>
 
           <div className={styles.captionSlot} ref={captionRef} style={{ opacity: 0 }}>

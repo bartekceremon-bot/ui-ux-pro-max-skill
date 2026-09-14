@@ -23,7 +23,15 @@ function gradientSky(zenith: string, horizon: string): THREE.CanvasTexture {
  * a pallet is a matte wooden object, and at the preset's own environment intensity the grain
  * disappears. Panel geometry, angles and the key:fill ratio are the rig's.
  */
-export function Lighting(): JSX.Element | null {
+type LightingProps = {
+  /**
+   * Whether to paint the gradient sky and fog. A product shot on a page section wants the
+   * section's own background behind it, not a second horizon inside a rectangle.
+   */
+  backdrop?: boolean;
+};
+
+export function Lighting({ backdrop = true }: LightingProps): JSX.Element | null {
   const { scene, gl } = useThree();
 
   useEffect(() => {
@@ -39,13 +47,15 @@ export function Lighting(): JSX.Element | null {
       contact: { color: '#ffffff', intensity: 1.1, mapSize: 1024, bias: -0.0002, normalBias: 0.02, extent: 4 },
     });
 
-    const sky = gradientSky('#1b1a17', '#3b352e');
-    scene.background = sky;
-    scene.fog = new THREE.Fog('#241f1b', 5, 15);
+    const sky = backdrop ? gradientSky('#1b1a17', '#3b352e') : null;
+    if (sky) {
+      scene.background = sky;
+      scene.fog = new THREE.Fog('#241f1b', 5, 15);
+    }
 
     return () => {
       rig.dispose();
-      sky.dispose();
+      sky?.dispose();
       scene.background = null;
       scene.fog = null;
     };

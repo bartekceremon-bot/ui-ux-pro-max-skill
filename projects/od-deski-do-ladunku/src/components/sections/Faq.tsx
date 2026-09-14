@@ -35,10 +35,10 @@ export function Faq(): JSX.Element {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className={`section-light ${styles.section}`}>
+    <section id="faq" className={`section-alt ${styles.section}`}>
       <div className="container" ref={ref}>
         <SectionHead
-          index="07"
+          index="05"
           kicker="FAQ"
           title="Najczęstsze pytania"
           lede="Odpowiedzi na to, o co pytają klienci przy pierwszym kontakcie."
