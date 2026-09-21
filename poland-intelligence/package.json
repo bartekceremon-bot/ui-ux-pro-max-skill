@@ -1,0 +1,32 @@
+{
+  "name": "poland-intelligence",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Poland Intelligence - platforma analizy firm, miejsc i danych publicznych",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "maplibre-gl": "^4.7.1",
+    "next": "14.2.33",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "prisma": "^5.17.0",
+    "tailwindcss": "^3.4.6",
+    "typescript": "^5.5.3"
+  }
+}

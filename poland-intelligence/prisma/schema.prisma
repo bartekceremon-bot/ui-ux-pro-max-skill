@@ -1,0 +1,450 @@
+// Poland Intelligence – schemat produkcyjny (PostgreSQL + PostGIS).
+// Aplikacja działa bez bazy (cache w pamięci, watchlist w przeglądarce);
+// baza jest potrzebna do trwałego cache, historii zmian i audytu.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// Wspólne pola proweniencji dla każdej tabeli źródłowej.
+model Source {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  label     String
+  homepage  String
+  apiBase   String
+  quality   String
+  createdAt DateTime @default(now())
+
+  apiLogs   ApiLog[]
+  syncJobs  SyncJob[]
+}
+
+model Entity {
+  id              String   @id @default(cuid())
+  name            String
+  nip             String?
+  regon           String?
+  krs             String?
+  legalForm       String?
+  address         String?
+  city            String?
+  postalCode      String?
+  voivodeship     String?
+  county          String?
+  municipality    String?
+  pkd             String[]
+  status          String?
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+
+  identifiers CompanyIdentifier[]
+  krsRecords  KrsRecord[]
+  ceidg       CeidgRecord[]
+  regonRecs   RegonRecord[]
+
+  @@index([nip])
+  @@index([regon])
+  @@index([krs])
+  @@map("entities")
+}
+
+model CompanyIdentifier {
+  id       String @id @default(cuid())
+  entityId String
+  kind     String // nip | regon | krs
+  value    String
+  entity   Entity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@unique([kind, value])
+  @@map("company_identifiers")
+}
+
+model KrsRecord {
+  id              String   @id @default(cuid())
+  entityId        String
+  krs             String
+  register        String
+  payload         Json
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+  entity          Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@map("krs_records")
+}
+
+model CeidgRecord {
+  id              String   @id @default(cuid())
+  entityId        String
+  ceidgId         String
+  payload         Json
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+  entity          Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@map("ceidg_records")
+}
+
+model RegonRecord {
+  id              String   @id @default(cuid())
+  entityId        String
+  regon           String
+  payload         Json
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+  entity          Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@map("regon_records")
+}
+
+model Territory {
+  id              String   @id @default(cuid())
+  terytCode       String   @unique
+  name            String
+  type            String
+  parentTerritory String?
+  lat             Float?
+  lon             Float?
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+
+  indicators BdlIndicator[]
+
+  @@map("territories")
+}
+
+model BdlIndicator {
+  id              String    @id @default(cuid())
+  territoryId     String
+  variableId      Int
+  label           String
+  unit            String
+  year            Int
+  value           Float?
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+  territory       Territory @relation(fields: [territoryId], references: [id], onDelete: Cascade)
+
+  @@unique([territoryId, variableId, year])
+  @@map("bdl_indicators")
+}
+
+model PublicDataset {
+  id              String   @id @default(cuid())
+  externalId      String   @unique
+  title           String
+  institution     String?
+  formats         String[]
+  categories      String[]
+  notes           String?
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+
+  @@map("public_datasets")
+}
+
+/// Geometrie są trzymane jako GeoJSON + kolumna PostGIS dodawana migracją:
+/// ALTER TABLE geo_features ADD COLUMN geom geometry(Geometry, 4326);
+model GeoFeature {
+  id              String   @id @default(cuid())
+  kind            String // address | building | parcel | road | osm | boundary
+  externalId      String?
+  name            String?
+  geojson         Json
+  lat             Float?
+  lon             Float?
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+
+  @@index([kind])
+  @@map("geo_features")
+}
+
+model AirStation {
+  id              String   @id @default(cuid())
+  externalId      String   @unique
+  name            String
+  lat             Float
+  lon             Float
+  city            String?
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+
+  measurements AirMeasurement[]
+
+  @@map("air_stations")
+}
+
+model AirMeasurement {
+  id          String     @id @default(cuid())
+  stationId   String
+  parameter   String
+  value       Float?
+  measuredAt  DateTime
+  source      String
+  sourceUrl   String
+  retrievedAt DateTime
+  rawDataHash String
+  station     AirStation @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  @@unique([stationId, parameter, measuredAt])
+  @@map("air_measurements")
+}
+
+model NfzContract {
+  id              String   @id @default(cuid())
+  providerCode    String
+  providerName    String
+  place           String?
+  year            Int
+  payload         Json
+  source          String
+  sourceUrl       String
+  retrievedAt     DateTime
+  sourceUpdatedAt DateTime?
+  rawDataHash     String
+
+  @@map("nfz_contracts")
+}
+
+model TransitAgency {
+  id          String   @id @default(cuid())
+  city        String
+  agency      String
+  gtfsUrl     String?
+  gtfsRtUrl   String?
+  active      Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+  source      String
+  sourceUrl   String
+  retrievedAt DateTime
+  rawDataHash String
+
+  routes TransitRoute[]
+  stops  TransitStop[]
+
+  @@unique([city, agency])
+  @@map("transit_agencies")
+}
+
+model TransitRoute {
+  id          String        @id @default(cuid())
+  agencyId    String
+  routeId     String
+  shortName   String?
+  longName    String?
+  routeType   Int?
+  source      String
+  sourceUrl   String
+  retrievedAt DateTime
+  rawDataHash String
+  agency      TransitAgency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  trips TransitTrip[]
+
+  @@unique([agencyId, routeId])
+  @@map("transit_routes")
+}
+
+model TransitStop {
+  id          String        @id @default(cuid())
+  agencyId    String
+  stopId      String
+  name        String
+  lat         Float
+  lon         Float
+  source      String
+  sourceUrl   String
+  retrievedAt DateTime
+  rawDataHash String
+  agency      TransitAgency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@unique([agencyId, stopId])
+  @@map("transit_stops")
+}
+
+model TransitTrip {
+  id          String       @id @default(cuid())
+  routeId     String
+  tripId      String
+  headsign    String?
+  serviceId   String?
+  source      String
+  sourceUrl   String
+  retrievedAt DateTime
+  rawDataHash String
+  route       TransitRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@unique([routeId, tripId])
+  @@map("transit_trips")
+}
+
+model WeatherObservation {
+  id          String   @id @default(cuid())
+  lat         Float
+  lon         Float
+  observedAt  DateTime
+  payload     Json
+  source      String
+  sourceUrl   String
+  retrievedAt DateTime
+  rawDataHash String
+
+  @@map("weather_observations")
+}
+
+model WeatherForecast {
+  id          String   @id @default(cuid())
+  lat         Float
+  lon         Float
+  validFrom   DateTime
+  payload     Json
+  source      String
+  sourceUrl   String
+  retrievedAt DateTime
+  rawDataHash String
+
+  @@map("weather_forecasts")
+}
+
+model NbpRate {
+  id            String   @id @default(cuid())
+  code          String
+  tableNo       String
+  effectiveDate DateTime
+  mid           Float
+  source        String
+  sourceUrl     String
+  retrievedAt   DateTime
+  rawDataHash   String
+
+  @@unique([code, effectiveDate])
+  @@map("nbp_rates")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("VIEWER") // ADMIN | ANALYST | VIEWER
+  createdAt    DateTime @default(now())
+
+  watchlists Watchlist[]
+  reports    Report[]
+  auditLogs  AuditLog[]
+
+  @@map("users")
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String // company | territory | address
+  targetId  String
+  label     String
+  snapshot  Json
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  changes ChangeEvent[]
+
+  @@unique([userId, kind, targetId])
+  @@map("watchlists")
+}
+
+model ChangeEvent {
+  id          String    @id @default(cuid())
+  watchlistId String
+  field       String
+  oldValue    String
+  newValue    String
+  source      String
+  detectedAt  DateTime  @default(now())
+  watchlist   Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+
+  @@map("change_events")
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  userId      String
+  kind        String // company | location
+  subject     String
+  format      String // pdf | html | csv | json
+  payload     Json
+  generatedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
+
+model ApiLog {
+  id         String   @id @default(cuid())
+  sourceId   String?
+  url        String
+  status     Int?
+  latencyMs  Int?
+  error      String?
+  occurredAt DateTime @default(now())
+  source     Source?  @relation(fields: [sourceId], references: [id])
+
+  @@map("api_logs")
+}
+
+model SyncJob {
+  id         String    @id @default(cuid())
+  sourceId   String?
+  kind       String
+  status     String // queued | running | success | failed
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  message    String?
+  source     Source?   @relation(fields: [sourceId], references: [id])
+
+  @@map("sync_jobs")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  target     String?
+  ip         String?
+  occurredAt DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
