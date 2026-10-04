@@ -24,7 +24,7 @@ from modelzoo import WEIGHTS_DIR, export_onnx, slug  # noqa: E402
 
 def train(data: str, name: str, base: str = "yolo11n-seg.pt", epochs: int = 60, imgsz: int = 640,
           batch: int = 16, device: str | None = None, workers: int = 4, patience: int = 20,
-          close_mosaic: int = 5, save_period: int = -1, log=print) -> dict:
+          close_mosaic: int = 5, save_period: int = -1, lr0: float = 0.01, log=print) -> dict:
     from ultralytics import YOLO
 
     WEIGHTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -35,7 +35,7 @@ def train(data: str, name: str, base: str = "yolo11n-seg.pt", epochs: int = 60, 
         data=data, epochs=epochs, imgsz=imgsz, batch=batch, device=device, workers=workers,
         patience=patience, project=str(WEIGHTS_DIR / "runs"), name=slug(name), exist_ok=True,
         # stacks of identical items: many objects per image, keep a lot of predictions
-        max_det=1000, close_mosaic=close_mosaic, save_period=save_period, plots=False,
+        max_det=1000, close_mosaic=close_mosaic, save_period=save_period, lr0=lr0, plots=False,
         # wood / cardboard colours vary a lot with light -> strong colour aug
         hsv_h=0.03, hsv_s=0.6, hsv_v=0.5, degrees=5, perspective=0.0005, fliplr=0.5, flipud=0.2,
     )
@@ -68,7 +68,8 @@ if __name__ == "__main__":
     ap.add_argument("--device", default=None)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--close-mosaic", type=int, default=5, help="last N epochs without mosaic")
+    ap.add_argument("--lr0", type=float, default=0.01, help="initial learning rate (lower for short fine-tunes)")
     ap.add_argument("--save-period", type=int, default=-1, help="keep a checkpoint every N epochs")
     a = ap.parse_args()
     train(a.data, a.name, a.base, a.epochs, a.imgsz, a.batch, a.device, a.workers,
-          close_mosaic=a.close_mosaic, save_period=a.save_period)
+          close_mosaic=a.close_mosaic, save_period=a.save_period, lr0=a.lr0)
