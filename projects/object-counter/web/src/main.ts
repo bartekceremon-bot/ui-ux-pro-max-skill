@@ -194,6 +194,9 @@ async function analyseLive() {
   try {
     const bitmap = await createImageBitmap(video);
     const pending = detector.detect(bitmap, detectOptions(false));
+    // ByteTrack thresholds follow the user's confidence setting
+    tracker.cfg.high = settings.conf;
+    tracker.cfg.low = Math.max(0.05, settings.conf * 0.5);
     // camera motion, computed while the worker runs inference
     const gw = 160, gh = Math.round((160 * vh) / vw);
     gmcCanvas.width = gw; gmcCanvas.height = gh;
