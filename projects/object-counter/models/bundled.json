@@ -24,22 +24,26 @@
       "demo": true
     },
     {
-      "id": "czola-real-v1",
-      "name": "Czoła desek/kłód/rur (zdjęcia z internetu, v1)",
-      "file": "czola-real-v1.onnx",
+      "id": "czola-kartony-real-v2",
+      "name": "Czoła desek/kłód/rur + kartony (zdjęcia z internetu, v2)",
+      "file": "czola-kartony-real-v2.onnx",
       "task": "segment",
       "imgsz": 640,
       "classes": [
-        "end"
+        "end",
+        "box"
       ],
       "source": "trained",
       "sizeMB": 11.6,
-      "base": "yolo11n-seg.pt",
+      "base": "czola-real-v1",
       "metrics": {
-        "metrics/mAP50(M)": 0.83
+        "metrics/mAP50(B)": 0.72624,
+        "metrics/mAP50-95(B)": 0.50125,
+        "metrics/mAP50(M)": 0.68837,
+        "metrics/mAP50-95(M)": 0.39068
       },
-      "data": "open-images-stacks-43",
-      "created": "2026-10-04T12:18:36"
+      "data": "open-images: 51 stosów + 420 zdjęć kartonów + 49 negatywów",
+      "created": "2026-10-04T14:00:53"
     }
   ]
 }
