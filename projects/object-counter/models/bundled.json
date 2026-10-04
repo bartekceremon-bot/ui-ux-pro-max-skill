@@ -22,6 +22,24 @@
       },
       "created": "2026-10-04T09:12:20",
       "demo": true
+    },
+    {
+      "id": "czola-real-v1",
+      "name": "Czoła desek/kłód/rur (zdjęcia z internetu, v1)",
+      "file": "czola-real-v1.onnx",
+      "task": "segment",
+      "imgsz": 640,
+      "classes": [
+        "end"
+      ],
+      "source": "trained",
+      "sizeMB": 11.6,
+      "base": "yolo11n-seg.pt",
+      "metrics": {
+        "metrics/mAP50(M)": 0.83
+      },
+      "data": "open-images-stacks-43",
+      "created": "2026-10-04T12:18:36"
     }
   ]
 }

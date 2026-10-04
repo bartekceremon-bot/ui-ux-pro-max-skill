@@ -6,3 +6,8 @@ Modele dołączone do repozytorium (nie da się ich odtworzyć w CI bez treningu
 
 `bundled.json` to wpisy manifestu dla tych plików. `server/export_models.py --bundled`
 kopiuje je do `web/public/models/`. Robi to też workflow GitHub Pages.
+
+* `czola-real-v1.onnx`: YOLO11n-seg, klasa `end` (czoło deski, kłody lub rury widziane czołowo).
+  Trenowany na 43 prawdziwych zdjęciach stosów z Open Images (~4 700 automatycznie oznaczonych
+  czół), Twoim zdjęciu stosu i scenach syntetycznych. Walidacja na 6 zdjęciach: mAP50 (maski)
+  ok. 0,83 względem etykiet automatycznych. Presety „Deski” i „Rury” wybierają go automatycznie.
