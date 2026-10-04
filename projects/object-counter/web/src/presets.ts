@@ -76,7 +76,11 @@ export function resolve(preset: Preset, models: ModelInfo[], override: EngineCho
       : null;
   };
   const usable = models.filter((m) => !m.demo);
-  for (const m of usable.filter((x) => x.source === 'trained')) {
+  // newest trained model first: a fresh dedicated model (e.g. boards only) wins over an older
+  // multi-class one for its classes, while other presets keep using the older model
+  const trained = usable.filter((x) => x.source === 'trained')
+    .sort((a, b) => (b.created ?? '').localeCompare(a.created ?? ''));
+  for (const m of trained) {
     const r = pick(m, 'dedykowany model');
     if (r) return r;
   }
