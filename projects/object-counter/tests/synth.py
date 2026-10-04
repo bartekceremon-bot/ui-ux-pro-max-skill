@@ -203,8 +203,28 @@ def scene_pipes(rng, H=900, W=1600, rows=None, cols=None):
     return img, boxes
 
 
+_TEXBANK: list[np.ndarray] = []
+
+
+def load_texbank(path: str | None) -> None:
+    """Real end-grain crops (cut from *training* photos) used as board textures --
+    closes most of the synthetic-to-real gap."""
+    if not path:
+        return
+    for f in sorted(Path(path).glob("*.jpg")):
+        im = cv2.imread(str(f))
+        if im is not None:
+            _TEXBANK.append(im.astype(np.float32))
+
+
 def pine_end(h: int, w: int, rng: np.random.Generator) -> np.ndarray:
     """Sawn softwood end: light, low-contrast arcs of an off-board pith, saw marks, dirt."""
+    if _TEXBANK and rng.random() < 0.7:
+        t = _TEXBANK[int(rng.integers(len(_TEXBANK)))]
+        if rng.random() < 0.5:
+            t = t[:, ::-1]
+        t = cv2.resize(t, (w, h), interpolation=cv2.INTER_LINEAR)
+        return np.clip(t * rng.uniform(0.75, 1.25) + rng.normal(0, 3, t.shape), 0, 255)
     tone = np.array([rng.uniform(175, 225), rng.uniform(135, 175), rng.uniform(70, 110)], np.float32)[::-1]
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
     cy = rng.choice([-1, 1]) * rng.uniform(1.0, 4.0) * h + h / 2
@@ -416,6 +436,7 @@ if __name__ == "__main__":
     ap.add_argument("--n", type=int, default=600)
     ap.add_argument("--size", type=int, default=640)
     ap.add_argument("--scenes", default=None, help="comma-separated subset of scenes for `dataset`")
+    ap.add_argument("--texbank", default=None, help="folder of real end-grain crops used as board textures")
     ap.add_argument("--out", type=Path, default=Path("tests/out"))
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--per-scene", type=int, default=3)
@@ -426,6 +447,7 @@ if __name__ == "__main__":
     ap.add_argument("--static", action="store_true", help="no camera motion (for Count & Freeze tests)")
     ap.add_argument("--zoom", type=float, default=1.9, help="scene width as a multiple of the frame width")
     a = ap.parse_args()
+    load_texbank(a.texbank)
     if a.cmd == "images":
         cmd_images(a.out, a.seed, a.per_scene)
     elif a.cmd == "dataset":
