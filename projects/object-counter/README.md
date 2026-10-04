@@ -172,6 +172,33 @@ YOLOE z opisem tekstowym wykrywał 0–14% desek. Droga do wysokiej dokładnośc
 6. Powtarzaj w pętli: model pomaga oznaczać nowe zdjęcia, nowe zdjęcia poprawiają model
    (active learning).
 
+### Dane z internetu i automatyczne oznaczanie (`server/autolabel.py`)
+
+Pierwszy model na prawdziwych zdjęciach (`czola-real`) powstał bez ręcznego oznaczania:
+
+1. **Źródło:** [Open Images](https://storage.googleapis.com/openimages/web/index.html)
+   (Google, licencja CC BY). Wybrane zostały zdjęcia z etykietami *Lumber*, *Logging*,
+   *Sawmill* i *Pipe*, pobrane z publicznego bucketu S3 `open-images-dataset`. Do klasy
+   *karton* użyte zostały ręczne ramki klasy *Box* (zdjęcia z co najmniej 3 kartonami).
+2. **Selekcja:** z ok. 1 700 pobranych zdjęć zostały wybrane ręcznie stosy widziane czołowo
+   (kłody, deski, rury, drewno opałowe).
+3. **Oznaczanie:** `autolabel.py` znajduje na każdym zdjęciu kilka wzorcowych elementów
+   (FastSAM lub obszary zamknięte krawędziami). Potem YOLOE z *visual prompts* wyszukuje
+   wszystkie podobne elementy wraz z maskami. Dwie rundy „bootstrapu” dodają wzorce innych
+   rozmiarów (bliskie i dalekie czoła). Zdjęcia ze słabymi oznaczeniami są odrzucane
+   po przeglądzie nakładek (`overlay/`).
+4. **Twarde negatywy:** model v1 przepuszczony przez kolejne zdjęcia pokazał fałszywe
+   wykrycia na drewnianych wnętrzach, drzwiach i meblach. Takie zdjęcia trafiają do
+   treningu z pustą etykietą („tu nie ma czego liczyć”).
+5. Do tego Twoje zdjęcie stosu i część scen syntetycznych.
+
+```bash
+python server/autolabel.py --images zdjecia/ --out oznaczone/   # labels/*.txt + overlay/*.jpg
+```
+
+Automatyczne etykiety mają błędy (pominięte dalekie czoła, czasem podwójne ramki). Przy
+modelu do zastosowań produkcyjnych przejrzyj je i popraw w zakładce „Kalibracja”.
+
 ## 7. Obecne ograniczenia
 
 * **Brak dedykowanego modelu dla prawdziwych desek**. Dołączony model „synth” był trenowany

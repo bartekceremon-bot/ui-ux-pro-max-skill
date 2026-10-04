@@ -29,7 +29,7 @@ export interface Preset {
 
 export const PRESETS: Preset[] = [
   { id: 'boards', label: 'Deski', noun: 'DESKA', icon: 'boards', cvOk: true,
-    names: ['board', 'deska', 'plank', 'wooden board', 'wooden plank', 'end of a wooden board', 'lumber', 'board_end'] },
+    names: ['end', 'board', 'deska', 'plank', 'wooden board', 'wooden plank', 'end of a wooden board', 'lumber', 'board_end'] },
   { id: 'boxes', label: 'Kartony', noun: 'KARTON', icon: 'box', cvOk: false,
     names: ['box', 'karton', 'carton', 'cardboard box'] },
   { id: 'parcels', label: 'Paczki', noun: 'PACZKA', icon: 'package', cvOk: false,
@@ -37,7 +37,7 @@ export const PRESETS: Preset[] = [
   { id: 'pallets', label: 'Palety', noun: 'PALETA', icon: 'pallet', cvOk: false,
     names: ['pallet', 'paleta', 'wooden pallet'] },
   { id: 'pipes', label: 'Rury', noun: 'RURA', icon: 'pipe', cvOk: true,
-    names: ['pipe', 'rura', 'tube', 'end of a pipe'] },
+    names: ['end', 'pipe', 'rura', 'tube', 'end of a pipe'] },
   { id: 'custom', label: 'Własny obiekt', noun: 'OBIEKT', icon: 'custom', cvOk: true, names: [] },
 ];
 
