@@ -58,13 +58,18 @@ Są trzy silniki o tym samym interfejsie (`Detection[]` z boxem, pewnością i o
    scalana. Dzięki temu małe, gęsto ułożone obiekty, np. czoła desek w dużym stosie, nie giną
    przy skalowaniu do 640 px.
 3. **Separator (bez modelu)** dla elementów widocznych czołowo ze szczelinami między nimi
-   (czoła desek, rury, kłody). Kroki: próg adaptacyjny → wypełnienie otworów (puste rury) →
+   (czoła desek, rury, kłody). Działa w trzech wariantach i sam wybiera najbardziej regularny
+   wynik: jasne elementy na ciemnym tle, ciemne na jasnym, albo **obszary zamknięte
+   krawędziami** (normalizacja kontrastu + Sobel). Ten ostatni sprawdza się na prawdziwych
+   stosach, gdzie czoła są raz jasne, raz zacienione. Kroki: próg adaptacyjny → wypełnienie otworów (puste rury) →
    otwarcie morfologiczne → transformata odległości → watershed z łączeniem płytkich basenów →
    scalanie nad-podzielonych regionów → filtr spójności (rozmiar, proporcje, jasność, nasycenie
    koloru), który odrzuca plamy tła. Działa od razu, zanim powstanie dedykowany model.
 
-Silnik dla danego typu obiektu wybierany jest automatycznie: model **wytrenowany** z pasującą
-nazwą klasy (np. `board`) → model ogólny z pasującą klasą (YOLOE) → Separator. Można go zmienić
+Silnik dla danego typu obiektu wybierany jest automatycznie: model **wytrenowany na prawdziwych
+danych** z pasującą nazwą klasy (np. `board`) → dla desek i rur Separator → model ogólny
+z pasującą klasą (YOLOE). Modele demo nie są wybierane automatycznie. Na prawdziwym zdjęciu stosu
+zarówno YOLOE (8 różnych opisów), jak i model syntetyczny znalazły 0 desek. Można go zmienić
 ręcznie w „Zmień obiekt → Silnik wykrywania”.
 
 ## 3. Użyte modele AI
@@ -73,7 +78,7 @@ ręcznie w „Zmień obiekt → Silnik wykrywania”.
 |---|---|---|
 | **YOLO11n-seg** (Ultralytics, COCO 80 klas) | obiekty ogólne (ludzie, auta, butelki, walizki…), test potoku | 11.8 MB |
 | **YOLOE-26s-seg** (open-vocabulary, tekst → klasy) | presety: *wooden board, cardboard box, parcel, pallet, pipe…* oraz „Własny obiekt” z dowolnego opisu (serwer wpieka embeddingi MobileCLIP do ONNX; przeglądarka nie potrzebuje enkodera tekstu) | 41.8 MB |
-| **deski-kartony-rury-synth** (YOLO11n-seg dotrenowany) | przykład pełnego cyklu „dataset → trening → wdrożenie”, trenowany na danych syntetycznych z `tests/synth.py` (klasy: board, box, pipe) | 11.8 MB |
+| **Demo: deski/kartony/rury** (YOLO11n-seg dotrenowany, `demo`) | przykład pełnego cyklu „dataset → trening → wdrożenie”, trenowany na danych syntetycznych z `tests/synth.py` (klasy: board, box, pipe) | 11.8 MB |
 
 Wszystkie modele to zwykłe pliki ONNX w `web/public/models/` opisane w `manifest.json`.
 Nowy model pojawia się w aplikacji po odświeżeniu strony, bez przebudowy.

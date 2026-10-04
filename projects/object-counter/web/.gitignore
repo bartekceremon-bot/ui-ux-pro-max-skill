@@ -3,3 +3,4 @@ dist/
 public/models/*.onnx
 public/models/manifest.json
 public/ort/
+public/coi-serviceworker.min.js
