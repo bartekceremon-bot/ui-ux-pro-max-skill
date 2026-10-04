@@ -74,12 +74,30 @@ def export_prompt(prompts: list[str], model_id: str | None = None, name: str | N
         os.chdir(cwd)
 
 
+def install_bundled() -> list[dict]:
+    """Copy the models committed under models/ (e.g. the synthetic-data demo model) into the app."""
+    import json
+    import shutil
+    from modelzoo import MODELS_DIR, ROOT, register
+    src = ROOT / "models"
+    out = []
+    if (src / "bundled.json").exists():
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        for e in json.loads((src / "bundled.json").read_text())["models"]:
+            shutil.copy(src / e["file"], MODELS_DIR / e["file"])
+            out.append(register(e))
+    return out
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--prompt", action="append", help="custom object text prompt (repeatable)")
     ap.add_argument("--skip-coco", action="store_true")
     ap.add_argument("--skip-presets", action="store_true")
+    ap.add_argument("--bundled", action="store_true", help="also install the models committed under models/")
     a = ap.parse_args()
+    if a.bundled:
+        print(install_bundled())
     if a.prompt:
         print(export_prompt(a.prompt))
     else:

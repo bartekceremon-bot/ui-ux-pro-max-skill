@@ -51,7 +51,7 @@ def train(data: str, name: str, base: str = "yolo11n-seg.pt", epochs: int = 60, 
         head, last = [h.strip() for h in rows[0]], rows[-1]
         metrics = {h: float(v) for h, v in zip(head, last) if "mAP" in h}
     entry = export_onnx(trained, slug(name), imgsz=imgsz, name=name, classes=classes,
-                        source="trained", extra={"base": base, "metrics": metrics, "data": str(data),
+                        source="trained", extra={"base": base, "metrics": metrics, "data": Path(data).parent.name,
                                "weights": str(best.relative_to(WEIGHTS_DIR))})
     log("deployed " + json.dumps(entry, ensure_ascii=False))
     return entry

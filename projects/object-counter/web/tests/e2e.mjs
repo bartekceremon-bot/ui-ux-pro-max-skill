@@ -27,8 +27,7 @@ mkdirSync(shots, { recursive: true });
 async function run(video, fn) {
   const browser = await chromium.launch({
     headless: true,
-    args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-video-capture=${video}`,
-      '--enable-unsafe-webgpu'],
+    args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-video-capture=${video}`],
   });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, deviceScaleFactor: 1 });
   await ctx.addInitScript(([p, e]) => {

@@ -35,13 +35,22 @@ function getCtx(w: number, h: number): OffscreenCanvasRenderingContext2D {
   return ctx!;
 }
 
-/** `navigator.gpu` can exist without a usable adapter (headless, blocklisted GPU) */
+/**
+ * `navigator.gpu` can exist without a usable adapter (headless, blocklisted
+ * GPU), or with a software "fallback" adapter (SwiftShader) that is far slower
+ * than multi-threaded WASM -- use WebGPU only on real hardware.
+ */
 async function hasWebGpu(): Promise<boolean> {
-  const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu;
+  type Adapter = { isFallbackAdapter?: boolean; info?: { isFallbackAdapter?: boolean; architecture?: string; vendor?: string } };
+  const gpu = (navigator as Navigator & { gpu?: { requestAdapter(): Promise<Adapter | null> } }).gpu;
   if (!gpu) return false;
   try {
-    const adapter = await Promise.race([gpu.requestAdapter(), new Promise((r) => setTimeout(() => r(null), 3000))]);
-    return !!adapter;
+    const adapter = await Promise.race([gpu.requestAdapter(), new Promise<null>((r) => setTimeout(() => r(null), 3000))]);
+    if (!adapter) return false;
+    const info = adapter.info ?? {};
+    if (adapter.isFallbackAdapter || info.isFallbackAdapter) return false;
+    if (/swiftshader/i.test(`${info.architecture ?? ''} ${info.vendor ?? ''}`)) return false;
+    return true;
   } catch { return false; }
 }
 
@@ -175,8 +184,14 @@ function inRoi(d: Detection, roi: DetectOptions['roi']): boolean {
   return cx >= roi.x1 && cx <= roi.x2 && cy >= roi.y1 && cy <= roi.y2;
 }
 
-self.onmessage = async (ev: MessageEvent<InMsg>) => {
-  const msg = ev.data;
+// ONNX sessions are not re-entrant: a "Policz" request arriving while a live
+// frame is still running must wait, so messages are processed strictly in order.
+let queue: Promise<void> = Promise.resolve();
+self.onmessage = (ev: MessageEvent<InMsg>) => {
+  queue = queue.then(() => handle(ev.data));
+};
+
+async function handle(msg: InMsg) {
   try {
     if (msg.type === 'load') {
       ort.env.wasm.wasmPaths = msg.ortBase; // runtime files served by the app (public/ort)
@@ -203,4 +218,4 @@ self.onmessage = async (ev: MessageEvent<InMsg>) => {
     if (msg.type === 'detect') msg.bitmap.close();
     self.postMessage({ type: 'error', id: (msg as { id?: number }).id, error: String((e as Error)?.message ?? e) });
   }
-};
+}

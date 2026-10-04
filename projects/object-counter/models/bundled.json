@@ -1,0 +1,26 @@
+{
+  "models": [
+    {
+      "id": "deski-kartony-rury-synth",
+      "name": "Deski/kartony/rury (synth)",
+      "file": "deski-kartony-rury-synth.onnx",
+      "task": "segment",
+      "imgsz": 640,
+      "classes": [
+        "board",
+        "box",
+        "pipe"
+      ],
+      "source": "trained",
+      "sizeMB": 11.6,
+      "base": "yolo11n-seg.pt",
+      "metrics": {
+        "metrics/mAP50(B)": 0.9882,
+        "metrics/mAP50-95(B)": 0.94104,
+        "metrics/mAP50(M)": 0.97591,
+        "metrics/mAP50-95(M)": 0.86984
+      },
+      "created": "2026-10-04T09:12:20"
+    }
+  ]
+}
