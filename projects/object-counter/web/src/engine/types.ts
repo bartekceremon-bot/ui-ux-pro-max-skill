@@ -35,13 +35,15 @@ export interface ModelInfo {
   sizeMB?: number;
   metrics?: Record<string, number>;
   created?: string;
+  /** demo model (e.g. trained on synthetic data): listed, but never picked automatically */
+  demo?: boolean;
 }
 
 export interface CvOptions {
   /** 0..1, higher = more objects split / lower contrast accepted */
   sensitivity: number;
   /** 'auto' picks the polarity with the more regular result */
-  polarity: 'auto' | 'bright' | 'dark';
+  polarity: 'auto' | 'bright' | 'dark' | 'edges';
 }
 
 export interface DetectOptions {

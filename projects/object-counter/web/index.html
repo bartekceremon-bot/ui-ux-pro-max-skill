@@ -8,6 +8,8 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <title>Licznik Obiektów</title>
+  <!-- enables multi-threaded inference on hosts without COOP/COEP headers (no-op when already isolated) -->
+  <script src="coi-serviceworker.min.js"></script>
 </head>
 <body>
   <header class="top">

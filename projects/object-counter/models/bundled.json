@@ -2,7 +2,7 @@
   "models": [
     {
       "id": "deski-kartony-rury-synth",
-      "name": "Deski/kartony/rury (synth)",
+      "name": "Demo: deski/kartony/rury (dane syntetyczne)",
       "file": "deski-kartony-rury-synth.onnx",
       "task": "segment",
       "imgsz": 640,
@@ -20,7 +20,8 @@
         "metrics/mAP50(M)": 0.97591,
         "metrics/mAP50-95(M)": 0.86984
       },
-      "created": "2026-10-04T09:12:20"
+      "created": "2026-10-04T09:12:20",
+      "demo": true
     }
   ]
 }

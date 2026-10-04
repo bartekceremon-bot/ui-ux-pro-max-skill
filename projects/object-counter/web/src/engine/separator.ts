@@ -336,12 +336,64 @@ function robust(values: number[], floor: number) {
 
 export interface SeparatorResult { dets: Detection[]; quality: number; labels: Int32Array }
 
-function runPolarity(gray: Gray, opt: CvOptions, bright: boolean): SeparatorResult {
+/**
+ * Edge mode: items are the regions *enclosed by edges*. Brightness-based
+ * thresholding fails on real lumber piles where board ends range from light to
+ * dark (shade, weathering) and touch light-coloured stickers; their outlines,
+ * however, stay visible. Local contrast normalisation first, so shadows don't
+ * erase edges, then Sobel magnitude with an adaptive (percentile) threshold.
+ */
+function edgeForeground(gray: Gray, sens: number): Uint8Array {
+  const { w, h } = gray;
+  const g = boxBlur3(gray.g, w, h);
+  const I = integral(g, w, h);
+  const sq = new Float32Array(g.length);
+  for (let i = 0; i < g.length; i++) sq[i] = g[i] * g[i];
+  const I2 = integral(sq, w, h);
+  const r = Math.max(7, Math.round(Math.min(w, h) / 16));
+  const n = new Float32Array(g.length);
+  for (let y = 0; y < h; y++) {
+    const y0 = Math.max(0, y - r), y1 = Math.min(h, y + r + 1);
+    for (let x = 0; x < w; x++) {
+      const x0 = Math.max(0, x - r), x1 = Math.min(w, x + r + 1);
+      const a = (x1 - x0) * (y1 - y0);
+      const s1 = I[y1 * (w + 1) + x1] - I[y0 * (w + 1) + x1] - I[y1 * (w + 1) + x0] + I[y0 * (w + 1) + x0];
+      const s2 = I2[y1 * (w + 1) + x1] - I2[y0 * (w + 1) + x1] - I2[y1 * (w + 1) + x0] + I2[y0 * (w + 1) + x0];
+      const m = s1 / a, sd = Math.sqrt(Math.max(0, s2 / a - m * m));
+      n[y * w + x] = (g[y * w + x] - m) / (sd + 8);
+    }
+  }
+  const mag = new Float32Array(g.length);
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x;
+      const gx = n[i - w + 1] + 2 * n[i + 1] + n[i + w + 1] - n[i - w - 1] - 2 * n[i - 1] - n[i + w - 1];
+      const gy = n[i + w - 1] + 2 * n[i + w] + n[i + w + 1] - n[i - w - 1] - 2 * n[i - w] - n[i - w + 1];
+      mag[i] = Math.hypot(gx, gy);
+    }
+  }
+  // threshold at a percentile: the edge fraction is fairly stable across scenes
+  const sample: number[] = [];
+  for (let i = 0; i < mag.length; i += 7) sample.push(mag[i]);
+  sample.sort((a, b) => a - b);
+  const T = sample[Math.floor(sample.length * (0.8 - 0.12 * sens))];
+  const fg = new Uint8Array(g.length);
+  for (let i = 0; i < fg.length; i++) fg[i] = mag[i] > T ? 0 : 1;
+  for (let x = 0; x < w; x++) { fg[x] = 0; fg[(h - 1) * w + x] = 0; }
+  for (let y = 0; y < h; y++) { fg[y * w] = 0; fg[y * w + w - 1] = 0; }
+  return fg;
+}
+
+type Mode = 'bright' | 'dark' | 'edges';
+
+function runPolarity(gray: Gray, opt: CvOptions, mode: Mode): SeparatorResult {
   const { w, h } = gray;
   const sens = Math.min(1, Math.max(0, opt.sensitivity));
   const win = Math.max(15, Math.round(Math.min(w, h) / 6));
   const offset = (0.5 - sens) * 16;
-  const th = threshold(gray, win, offset, bright);
+  const th = mode === 'edges'
+    ? { fg: edgeForeground(gray, sens), margin: new Float32Array(w * h).fill(10) } // no brightness-contrast gate
+    : threshold(gray, win, offset, mode === 'bright');
   let fg = th.fg;
   fillHoles(fg, w, h);
   fg = morph(morph(fg, w, h, true), w, h, false);
@@ -384,7 +436,8 @@ function runPolarity(gray: Gray, opt: CvOptions, bright: boolean): SeparatorResu
   // Reject regions that are outliers w.r.t. the typical-size ones (ground blobs, shadow strips).
   const core = cand.filter((c) => c.ratio >= 0.6 && c.ratio <= 1.6);
   const ref = core.length >= 3 ? core : cand;
-  const zg = robust(ref.map((c) => c.r.gray), 8);
+  // light and shaded board ends are equally valid in edge mode -> no brightness test
+  const zg = mode === 'edges' ? () => 0 : robust(ref.map((c) => c.r.gray), 8);
   const zc = robust(ref.map((c) => c.r.chroma), 6);
   const za = robust(ref.map((c) => c.aspect), 0.25);
   const dets: Detection[] = [];
@@ -413,11 +466,11 @@ function runPolarity(gray: Gray, opt: CvOptions, bright: boolean): SeparatorResu
 export function separate(rgba: Uint8ClampedArray, w: number, h: number, opt: CvOptions, withMasks: boolean): Detection[] {
   const gray = toGray(rgba, w, h);
   let res: SeparatorResult;
-  if (opt.polarity === 'bright') res = runPolarity(gray, opt, true);
-  else if (opt.polarity === 'dark') res = runPolarity(gray, opt, false);
+  if (opt.polarity !== 'auto') res = runPolarity(gray, opt, opt.polarity);
   else {
-    const a = runPolarity(gray, opt, true), b = runPolarity(gray, opt, false);
-    res = a.quality >= b.quality ? a : b;
+    // try all three and keep the most regular result
+    res = (['bright', 'dark', 'edges'] as Mode[]).map((m) => runPolarity(gray, opt, m))
+      .reduce((a, b) => (b.quality > a.quality ? b : a));
   }
   for (const d of res.dets) {
     const id = (d as Detection & { _id?: number })._id!;

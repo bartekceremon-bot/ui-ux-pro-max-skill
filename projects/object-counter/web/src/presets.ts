@@ -5,8 +5,10 @@
  * Engine resolution for a preset (first hit wins):
  *   1. the user's explicit choice for this preset (Zmień obiekt -> Silnik)
  *   2. a *trained* model (source "trained") having one of the preset's class names
- *   3. any other model having one of the class names (e.g. open-vocabulary YOLOE)
- *   4. the model-free Separator, if it suits the object (end-on stacks)
+ *      (demo models -- e.g. trained on synthetic scenes only -- are never auto-picked)
+ *   3. the model-free Separator for end-on stacks (boards, pipes)
+ *   4. any other model having one of the class names (e.g. open-vocabulary YOLOE)
+ *   5. the Separator as the last resort
  *
  * Adding a dedicated model is therefore zero-code: train it with class name
  * "board" (or "deska"), export, and the "Deski" preset picks it up.
@@ -67,16 +69,25 @@ export function resolve(preset: Preset, models: ModelInfo[], override: EngineCho
       return { choice: override, model: m, classes: idx && idx.length ? idx : null, why: 'wybór użytkownika' };
     }
   }
-  const ranked = [...models].sort((a, b) => Number(b.source === 'trained') - Number(a.source === 'trained'));
-  for (const m of ranked) {
+  const pick = (m: ModelInfo, why: string): Resolved | null => {
     const idx = classIndices(m, preset.names);
-    if (idx.length) {
-      return {
-        choice: { engine: 'yolo', modelId: m.id, classNames: idx.map((i) => m.classes[i]) },
-        model: m, classes: idx,
-        why: m.source === 'trained' ? 'dedykowany model' : 'model ogólny',
-      };
-    }
+    return idx.length
+      ? { choice: { engine: 'yolo', modelId: m.id, classNames: idx.map((i) => m.classes[i]) }, model: m, classes: idx, why }
+      : null;
+  };
+  const usable = models.filter((m) => !m.demo);
+  for (const m of usable.filter((x) => x.source === 'trained')) {
+    const r = pick(m, 'dedykowany model');
+    if (r) return r;
+  }
+  // Generic open-vocabulary models don't find individual board / pipe ends in real
+  // piles (verified on real photos) -- the Separator does better there.
+  if (preset.cvOk && preset.id !== 'custom') {
+    return { choice: { engine: 'cv' }, model: null, classes: null, why: 'Separator – brak dedykowanego modelu' };
+  }
+  for (const m of usable) {
+    const r = pick(m, 'model ogólny');
+    if (r) return r;
   }
   return { choice: { engine: 'cv' }, model: null, classes: null, why: 'brak modelu – Separator' };
 }

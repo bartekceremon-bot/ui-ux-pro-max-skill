@@ -12,6 +12,9 @@ mkdirSync('public/ort', { recursive: true });
 for (const f of ['ort-wasm-simd-threaded.asyncify.mjs', 'ort-wasm-simd-threaded.asyncify.wasm']) {
   copyFileSync(ortDist + f, `public/ort/${f}`);
 }
+// Static hosts (GitHub Pages) can't send COOP/COEP headers; this service worker
+// adds them so the page becomes cross-origin isolated -> multi-threaded WASM.
+copyFileSync(fileURLToPath(new URL('./node_modules/coi-serviceworker/coi-serviceworker.min.js', import.meta.url)), 'public/coi-serviceworker.min.js');
 
 // Camera access (getUserMedia) needs a secure context. localhost is fine;
 // to open the dev server from a phone on the LAN run with HTTPS=1.
