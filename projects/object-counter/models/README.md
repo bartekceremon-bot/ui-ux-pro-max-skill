@@ -7,7 +7,10 @@ Modele dołączone do repozytorium (nie da się ich odtworzyć w CI bez treningu
 `bundled.json` to wpisy manifestu dla tych plików. `server/export_models.py --bundled`
 kopiuje je do `web/public/models/`. Robi to też workflow GitHub Pages.
 
-* `czola-real-v1.onnx`: YOLO11n-seg, klasa `end` (czoło deski, kłody lub rury widziane czołowo).
-  Trenowany na 43 prawdziwych zdjęciach stosów z Open Images (~4 700 automatycznie oznaczonych
-  czół), Twoim zdjęciu stosu i scenach syntetycznych. Walidacja na 6 zdjęciach: mAP50 (maski)
-  ok. 0,83 względem etykiet automatycznych. Presety „Deski” i „Rury” wybierają go automatycznie.
+* `czola-kartony-real-v2.onnx`: YOLO11n-seg, klasy `end` (czoło deski, kłody lub rury) i `box`
+  (karton). Douczony z v1 na prawdziwych zdjęciach z Open Images: 51 stosów (auto-oznaczone
+  YOLOE), 420 zdjęć kartonów z ręcznymi ramkami, 49 twardych negatywów (drewniane wnętrza
+  i meble) oraz sceny syntetyczne.
+  * Fałszywe wykrycia na zdjęciach bez stosów spadły 3× względem v1.
+  * Na 35 zdjęciach testowych kartonów średni błąd liczenia wynosi ±2.
+  * Presety „Deski” i „Rury” używają klasy `end`, a „Kartony” i „Paczki” klasy `box`.
