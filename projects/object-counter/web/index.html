@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B0F14" />
+  <meta name="description" content="Wykrywanie i liczenie obiektów kamerą w czasie rzeczywistym" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>Licznik Obiektów</title>
+</head>
+<body>
+  <header class="top">
+    <h1>LICZNIK OBIEKTÓW</h1>
+    <div class="top-right">
+      <span class="pill" id="engine-pill" title="Silnik wykrywania">–</span>
+      <button class="icon-btn" id="btn-settings" aria-label="Ustawienia"></button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage" id="stage" aria-label="Obraz z kamery">
+      <video id="video" playsinline muted autoplay></video>
+      <canvas id="still" hidden></canvas>
+      <canvas id="overlay"></canvas>
+      <div class="hud" id="hud" aria-live="off">
+        <span>Obiekt: <b id="hud-obj">–</b></span>
+        <span>Liczba: <b id="hud-count">0</b></span>
+        <span>Pewność śr.: <b id="hud-conf">–</b></span>
+        <span>FPS: <b id="hud-fps">–</b></span>
+      </div>
+      <div class="mode-badge" id="mode-badge">LIVE</div>
+      <div class="start-panel" id="start-panel">
+        <button class="btn primary xl" id="btn-start"></button>
+        <label class="btn ghost" id="lbl-file">
+          <span>Wczytaj zdjęcie</span>
+          <input type="file" accept="image/*" id="file" hidden />
+        </label>
+        <p class="status" id="status" role="status"></p>
+      </div>
+      <div class="busy" id="busy" hidden><div class="spinner"></div><span id="busy-text">Analiza…</span></div>
+    </section>
+
+    <section class="panel">
+      <div class="count-card">
+        <div class="count-main">
+          <span class="count-label" id="count-label">ZNALEZIONO</span>
+          <span class="count-num" id="count-num" aria-live="polite">0</span>
+        </div>
+        <div class="count-sub">
+          <span>Typ: <b id="type-label">–</b></span>
+          <span id="unique-wrap">Łącznie (skan): <b id="unique-num">0</b>
+            <button class="link" id="btn-reset" title="Wyzeruj śledzenie i licznik łączny">Zeruj</button></span>
+        </div>
+      </div>
+
+      <div class="actions" id="actions-live">
+        <button class="btn primary xl" id="btn-count"></button>
+        <button class="btn xl" id="btn-photo"></button>
+        <div class="row2">
+          <button class="btn" id="btn-type"></button>
+          <button class="btn" id="btn-history"></button>
+        </div>
+        <div class="row2">
+          <button class="btn subtle" id="btn-roi"></button>
+          <button class="btn subtle" id="btn-calib"></button>
+        </div>
+      </div>
+
+      <div class="actions" id="actions-frozen" hidden>
+        <p class="result-title">Znaleziono: <b id="frozen-num">0</b> <span id="frozen-word">obiektów</span></p>
+        <p class="hint">Dotknij ramki, aby ją usunąć (lub przywrócić). Dotknij pustego miejsca, aby dodać pominięty obiekt.</p>
+        <div class="row2">
+          <button class="btn primary xl" id="btn-accept"></button>
+          <button class="btn xl" id="btn-retry"></button>
+        </div>
+        <button class="btn subtle" id="btn-sample"></button>
+      </div>
+    </section>
+  </main>
+
+  <!-- object type -->
+  <dialog id="dlg-type" aria-labelledby="dlg-type-h">
+    <form method="dialog" class="sheet">
+      <header><h2 id="dlg-type-h">Co chcesz policzyć?</h2><button class="icon-btn close" value="close" aria-label="Zamknij"></button></header>
+      <div class="preset-grid" id="preset-grid"></div>
+      <div class="field" id="custom-box" hidden>
+        <label for="custom-text">Nazwa obiektu (np. „plastic crate”, „brick”; po angielsku działa najlepiej)</label>
+        <div class="row-input">
+          <input id="custom-text" type="text" placeholder="np. plastic crate" autocomplete="off" />
+          <button type="button" class="btn" id="btn-custom-make">Utwórz model AI</button>
+        </div>
+        <p class="hint" id="custom-hint"></p>
+      </div>
+      <div class="field">
+        <label for="engine-select">Silnik wykrywania</label>
+        <select id="engine-select"></select>
+        <label for="class-select" id="class-label">Klasy z modelu</label>
+        <select id="class-select" multiple size="5"></select>
+        <p class="hint" id="engine-hint"></p>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- history -->
+  <dialog id="dlg-history" aria-labelledby="dlg-history-h">
+    <form method="dialog" class="sheet">
+      <header><h2 id="dlg-history-h">Historia pomiarów</h2><button class="icon-btn close" value="close" aria-label="Zamknij"></button></header>
+      <ul class="history" id="history-list"></ul>
+      <div class="row2">
+        <button type="button" class="btn" id="btn-history-csv">Eksportuj CSV</button>
+        <button type="button" class="btn danger" id="btn-history-clear">Wyczyść</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- calibration / dataset -->
+  <dialog id="dlg-calib" aria-labelledby="dlg-calib-h">
+    <form method="dialog" class="sheet">
+      <header><h2 id="dlg-calib-h">Kalibracja – własny model</h2><button class="icon-btn close" value="close" aria-label="Zamknij"></button></header>
+      <ol class="steps">
+        <li>Zrób kilkanaście–kilkadziesiąt zdjęć obiektów (różne oświetlenie, odległość, kąt).</li>
+        <li>Popraw ramki: każdy obiekt = jedna ramka.</li>
+        <li>Wyślij dataset na serwer i uruchom trening (lub wyeksportuj ZIP i trenuj na komputerze z GPU).</li>
+        <li>Nowy model pojawi się automatycznie w „Zmień obiekt → Silnik”.</li>
+      </ol>
+      <div class="row2">
+        <button type="button" class="btn primary" id="btn-calib-add">Dodaj zdjęcie z kamery</button>
+        <label class="btn"><span>Dodaj z pliku</span><input type="file" accept="image/*" multiple id="calib-file" hidden /></label>
+      </div>
+      <p class="hint" id="calib-stats"></p>
+      <div class="thumbs" id="calib-list"></div>
+      <div class="field">
+        <label for="calib-class">Nazwa klasy w datasecie</label>
+        <input id="calib-class" type="text" />
+      </div>
+      <div class="row2">
+        <button type="button" class="btn" id="btn-calib-zip">Eksportuj ZIP (YOLO)</button>
+        <button type="button" class="btn primary" id="btn-calib-train">Wyślij i trenuj (serwer)</button>
+      </div>
+      <pre class="log" id="train-log" hidden></pre>
+    </form>
+  </dialog>
+
+  <!-- label editor -->
+  <dialog id="dlg-label" aria-labelledby="dlg-label-h" class="wide">
+    <form method="dialog" class="sheet">
+      <header><h2 id="dlg-label-h">Oznacz obiekty: <span id="label-count">0</span></h2><button class="icon-btn close" value="cancel" aria-label="Anuluj"></button></header>
+      <p class="hint">Przeciągnij, aby narysować ramkę. Dotknij ramki, aby ją usunąć.</p>
+      <div class="label-wrap"><canvas id="label-canvas"></canvas></div>
+      <div class="row2">
+        <button type="button" class="btn primary" id="btn-label-save">Zapisz próbkę</button>
+        <button type="button" class="btn danger" id="btn-label-delete">Usuń próbkę</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- settings -->
+  <dialog id="dlg-settings" aria-labelledby="dlg-settings-h">
+    <form method="dialog" class="sheet">
+      <header><h2 id="dlg-settings-h">Ustawienia</h2><button class="icon-btn close" value="close" aria-label="Zamknij"></button></header>
+      <div class="field">
+        <label for="set-conf">Próg pewności: <b id="set-conf-v"></b></label>
+        <input type="range" id="set-conf" min="0.05" max="0.9" step="0.05" />
+      </div>
+      <div class="field">
+        <label for="set-sens">Czułość Separatora (rozdzielanie stosu): <b id="set-sens-v"></b></label>
+        <input type="range" id="set-sens" min="0" max="1" step="0.05" />
+      </div>
+      <label class="check"><input type="checkbox" id="set-masks" /> Pokaż maski segmentacji</label>
+      <label class="check"><input type="checkbox" id="set-showconf" /> Pokaż pewność przy ramkach</label>
+      <label class="check"><input type="checkbox" id="set-server" /> „Policz” na serwerze (dokładniej, wymaga backendu)</label>
+      <div class="field">
+        <label for="set-backend">Akceleracja</label>
+        <select id="set-backend">
+          <option value="auto">Automatycznie (WebGPU → WASM)</option>
+          <option value="wasm">Tylko CPU (WASM)</option>
+        </select>
+      </div>
+      <p class="hint" id="about"></p>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

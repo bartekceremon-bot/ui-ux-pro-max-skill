@@ -1,0 +1,4 @@
+tests/out/
+# weights ultralytics downloads into the working directory (MobileCLIP, base .pt)
+/*.ts
+/*.pt

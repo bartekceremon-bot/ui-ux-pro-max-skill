@@ -1,0 +1,9 @@
+# Backend + model tooling. For CPU-only machines install torch from
+# https://download.pytorch.org/whl/cpu first to avoid the large CUDA wheels.
+ultralytics>=8.4
+onnx>=1.17
+onnxslim
+onnxruntime
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart

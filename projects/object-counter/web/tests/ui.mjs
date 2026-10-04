@@ -1,0 +1,27 @@
+// UI smoke test on a phone-sized viewport: main screen, object picker, calibration, settings.
+import { chromium } from 'playwright';
+import { resolve } from 'node:path';
+const url = process.argv[2] ?? 'http://127.0.0.1:8000';
+const out = resolve(process.argv[3] ?? '../tests/out/shots');
+const video = process.argv[4] && resolve(process.argv[4]);
+const browser = await chromium.launch({ headless: true, args: video ? ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-video-capture=${video}`] : [] });
+const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+const errors = [];
+page.on('pageerror', (e) => errors.push(e.message));
+await page.goto(url + (video ? '/?autostart=1' : ''));
+await page.waitForFunction(() => window.__oc?.ready, null, { timeout: 120000 });
+await page.waitForTimeout(video ? 4000 : 500);
+await page.screenshot({ path: `${out}/mobile-main.png`, fullPage: true });
+await page.click('#btn-type');
+await page.waitForTimeout(300);
+await page.screenshot({ path: `${out}/mobile-type.png` });
+await page.click('#dlg-type .close');
+await page.click('#btn-calib');
+await page.waitForTimeout(300);
+await page.screenshot({ path: `${out}/mobile-calib.png` });
+await page.click('#dlg-calib .close');
+await page.click('#btn-settings');
+await page.waitForTimeout(300);
+await page.screenshot({ path: `${out}/mobile-settings.png` });
+console.log(JSON.stringify({ errors }));
+await browser.close();
