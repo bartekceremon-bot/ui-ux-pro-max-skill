@@ -139,6 +139,7 @@ function detectOptions(accurate: boolean): DetectOptions {
     masks: settings.masks,
     agnostic: true,
     roi,
+    stack: preset.id !== 'custom',
     cv: { sensitivity: settings.sens, polarity: 'auto' },
   };
 }

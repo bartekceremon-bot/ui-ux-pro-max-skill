@@ -46,9 +46,9 @@
       "created": "2026-10-04T14:00:53"
     },
     {
-      "id": "deski-czola-v6",
-      "name": "Deski / czoła (dedykowany, v6)",
-      "file": "deski-czola-v6.onnx",
+      "id": "deski-v7",
+      "name": "Deski / czoła (Twoje paczki, v7)",
+      "file": "deski-v7.onnx",
       "task": "segment",
       "imgsz": 640,
       "classes": [
@@ -56,14 +56,13 @@
       ],
       "source": "trained",
       "sizeMB": 11.6,
-      "base": "czola-real-v1",
+      "base": "deski-czola-v6",
       "conf": 0.45,
-      "data": "open-images stosy + paczki tarcicy (synt. + prawdziwe tekstury) + negatywy",
+      "data": "v6 + 6 zdjęć paczek użytkownika (×12) ",
       "metrics": {
-        "stack2@0.45": 86,
-        "fp_per_photo@0.45": 8.0
+        "fp_per_photo@0.45_stackfilter": 4.6
       },
-      "created": "2026-10-04T18:57:29"
+      "created": "2026-10-05T09:22:07"
     }
   ]
 }
