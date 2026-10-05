@@ -35,8 +35,8 @@ function plural(n: number, one: string, few: string, many: string) {
 }
 
 // ------------------------------------------------------------------ settings
-interface Settings { conf: number; sens: number; masks: boolean; showConf: boolean; server: boolean; backend: 'auto' | 'wasm'; preset: string }
-const defaults: Settings = { conf: 0.35, sens: 0.5, masks: true, showConf: true, server: false, backend: 'auto', preset: 'boards' };
+interface Settings { conf: number; confTouched: boolean; sens: number; masks: boolean; showConf: boolean; server: boolean; backend: 'auto' | 'wasm'; preset: string }
+const defaults: Settings = { conf: 0.35, confTouched: false, sens: 0.5, masks: true, showConf: true, server: false, backend: 'auto', preset: 'boards' };
 function loadSettings(): Settings {
   try { return { ...defaults, ...JSON.parse(localStorage.getItem('oc.settings') ?? '{}') }; } catch { return { ...defaults }; }
 }
@@ -121,8 +121,14 @@ async function applyEngine() {
   engineLoading = null;
 }
 
+/** user's threshold once they moved the slider, else the model's recommended one */
+function effectiveConf(): number {
+  if (settings.confTouched) return settings.conf;
+  return resolved.choice.engine === 'yolo' && resolved.model?.conf ? resolved.model.conf : defaults.conf;
+}
+
 function detectOptions(accurate: boolean): DetectOptions {
-  const conf = settings.conf;
+  const conf = effectiveConf();
   return {
     engine: resolved.choice.engine,
     // live: detector threshold low, the tracker separates strong/weak (ByteTrack)
@@ -195,8 +201,8 @@ async function analyseLive() {
     const bitmap = await createImageBitmap(video);
     const pending = detector.detect(bitmap, detectOptions(false));
     // ByteTrack thresholds follow the user's confidence setting
-    tracker.cfg.high = settings.conf;
-    tracker.cfg.low = Math.max(0.05, settings.conf * 0.5);
+    tracker.cfg.high = effectiveConf();
+    tracker.cfg.low = Math.max(0.05, effectiveConf() * 0.5);
     // camera motion, computed while the worker runs inference
     const gw = 160, gh = Math.round((160 * vh) / vw);
     gmcCanvas.width = gw; gmcCanvas.height = gh;
@@ -265,7 +271,7 @@ async function analyseStill(source: CanvasImageSource & { width?: number; height
     const t0 = performance.now();
     if (settings.server && health?.ok && resolved.model) {
       const blob = await new Promise<Blob>((r) => still.toBlob((b) => r(b!), 'image/jpeg', 0.92));
-      const res = await api.serverDetect(blob, resolved.model.id, resolved.classes ? resolved.classes.map((i) => resolved.model!.classes[i]) : null, settings.conf);
+      const res = await api.serverDetect(blob, resolved.model.id, resolved.classes ? resolved.classes.map((i) => resolved.model!.classes[i]) : null, effectiveConf());
       dets = res.dets;
       frozen.engine += ' · serwer';
     } else {
@@ -763,11 +769,12 @@ async function uploadAndTrain() {
 function setupSettings() {
   const conf = $<HTMLInputElement>('set-conf'), sens = $<HTMLInputElement>('set-sens');
   const sync = () => {
-    $('set-conf-v').textContent = pct(settings.conf);
+    $('set-conf-v').textContent = pct(effectiveConf()) + (settings.confTouched ? '' : ' (domyślny dla modelu)');
     $('set-sens-v').textContent = pct(settings.sens);
   };
-  conf.value = String(settings.conf); sens.value = String(settings.sens);
-  conf.oninput = () => { settings.conf = +conf.value; sync(); saveSettings(); };
+  conf.value = String(effectiveConf()); sens.value = String(settings.sens);
+  conf.oninput = () => { settings.conf = +conf.value; settings.confTouched = true; sync(); saveSettings(); };
+  $('btn-settings').addEventListener('click', () => { conf.value = String(effectiveConf()); sync(); });
   sens.oninput = () => { settings.sens = +sens.value; sync(); saveSettings(); };
   const chk = (id: string, key: 'masks' | 'showConf' | 'server') => {
     const el = $<HTMLInputElement>(id);

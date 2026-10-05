@@ -11,7 +11,8 @@ const logs = [];
 page.on('console', (m) => logs.push(m.text()));
 await page.addInitScript(([model, classes, preset, engine]) => {
   localStorage.setItem('oc.settings', JSON.stringify({ preset }));
-  localStorage.setItem('oc.engine.' + preset, JSON.stringify(engine === 'cv' ? { engine: 'cv' } : { engine: 'yolo', modelId: model, classNames: classes ? classes.split(',') : [] }));
+  if (engine === 'auto') localStorage.removeItem('oc.engine.' + preset);
+  else localStorage.setItem('oc.engine.' + preset, JSON.stringify(engine === 'cv' ? { engine: 'cv' } : { engine: 'yolo', modelId: model, classNames: classes ? classes.split(',') : [] }));
 }, [a.model ?? 'coco-yolo11n-seg', a.classes ?? '', a.preset ?? 'custom', a.engine ?? 'yolo']);
 await page.goto(a.url ?? 'http://127.0.0.1:8000');
 await page.waitForFunction(() => window.__oc?.ready, null, { timeout: 120000 });

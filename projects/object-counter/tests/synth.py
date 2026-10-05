@@ -203,11 +203,89 @@ def scene_pipes(rng, H=900, W=1600, rows=None, cols=None):
     return img, boxes
 
 
+_TEXBANK: list[np.ndarray] = []
+
+
+def load_texbank(path: str | None) -> None:
+    """Real end-grain crops (cut from *training* photos) used as board textures --
+    closes most of the synthetic-to-real gap."""
+    if not path:
+        return
+    for f in sorted(Path(path).glob("*.jpg")):
+        im = cv2.imread(str(f))
+        if im is not None:
+            _TEXBANK.append(im.astype(np.float32))
+
+
+def pine_end(h: int, w: int, rng: np.random.Generator) -> np.ndarray:
+    """Sawn softwood end: light, low-contrast arcs of an off-board pith, saw marks, dirt."""
+    if _TEXBANK and rng.random() < 0.7:
+        t = _TEXBANK[int(rng.integers(len(_TEXBANK)))]
+        if rng.random() < 0.5:
+            t = t[:, ::-1]
+        t = cv2.resize(t, (w, h), interpolation=cv2.INTER_LINEAR)
+        return np.clip(t * rng.uniform(0.75, 1.25) + rng.normal(0, 3, t.shape), 0, 255)
+    tone = np.array([rng.uniform(175, 225), rng.uniform(135, 175), rng.uniform(70, 110)], np.float32)[::-1]
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    cy = rng.choice([-1, 1]) * rng.uniform(1.0, 4.0) * h + h / 2
+    cx = rng.uniform(-0.5, 1.5) * w
+    r = np.hypot(yy - cy, xx - cx) + 2 * _noise(h, w, rng, 6)
+    rings = 0.5 + 0.5 * np.sin(r * rng.uniform(0.35, 0.8))
+    img = tone[None, None, :] * (0.86 + 0.14 * rings[..., None]) * (0.9 + 0.2 * _noise(h, w, rng, 4)[..., None])
+    if rng.random() < 0.35:  # weathered / darker board
+        img *= rng.uniform(0.6, 0.85)
+    if rng.random() < 0.06:  # spray-paint marking across the end
+        col = np.array(rng.choice([[200, 140, 40], [60, 60, 220], [40, 160, 200], [70, 60, 200]]), np.float32)
+        a = np.clip(_noise(h, w, rng, 3) * 1.6 - 0.2, 0, 1)[..., None] * rng.uniform(0.5, 0.9)
+        img = img * (1 - a) + col * a
+    if rng.random() < 0.5:  # row of nail holes / saw tearing near one edge
+        y = int(h * rng.choice([0.15, 0.85]))
+        for x in range(int(w * 0.05), w, max(4, w // 18)):
+            cv2.circle(img, (x, y), max(1, h // 14), (60, 50, 40), -1)
+    return img
+
+
+def scene_planks_tight(rng, H=900, W=1600, cols=None):
+    """Sawn-timber package seen from the end: columns of thin planks packed tight,
+    columns staggered, hair-line dark seams (the classic lumber-yard count)."""
+    img = background(H, W, rng) * rng.uniform(0.5, 0.9)
+    cols = cols or int(rng.integers(4, 10))
+    bw = int(rng.uniform(70, 150))
+    bh = max(10, int(bw / rng.uniform(2.5, 6.5)))
+    rows = int(rng.integers(8, max(9, min(26, (H * 0.8) // bh))))
+    seam = int(rng.integers(1, 4))
+    stack_w = cols * (bw + seam)
+    ox = (W - stack_w) // 2 + int(rng.integers(-W // 8, W // 8))
+    oy = int(H * rng.uniform(0.05, 0.15))
+    # side face of the package (long faces of the outer boards) to the left
+    side_w = int(rng.uniform(0, 0.35) * W)
+    if side_w > 20:
+        side = wood_side(rows * (bh + seam), side_w, rng) * 1.05
+        paste(img, side, ox - side_w, oy)
+    seam_col = rng.uniform(25, 70)
+    img[oy:oy + rows * (bh + seam) + bh, max(0, ox):ox + stack_w] = seam_col  # dark gaps behind the boards
+    boxes = []
+    for c in range(cols):
+        x = ox + c * (bw + seam) + int(rng.integers(-2, 3))
+        stagger = int(rng.integers(0, bh))
+        n = rows - int(rng.integers(0, 3))
+        for r in range(n):
+            y = oy + stagger + r * (bh + seam)
+            ww = bw + int(rng.integers(-3, 4)); hh = bh + int(rng.integers(-1, 2))
+            if y + hh > H or x + ww > W or x < 0:
+                continue
+            tile = shade_edges(pine_end(hh, ww, rng), 0.25, 0.1)
+            paste(img, tile, x, y)
+            boxes.append([x, y, x + ww, y + hh])
+    return img, boxes
+
+
 SCENES = {
     "boards_end": scene_boards_end,
     "boards_side": scene_boards_side,
     "boxes": scene_boxes,
     "pipes": scene_pipes,
+    "planks_tight": scene_planks_tight,
 }
 
 
@@ -224,7 +302,7 @@ def finish(img: np.ndarray, rng: np.random.Generator, light: float = 1.0) -> np.
 
 # ---------------------------------------------------------------- outputs
 # class ids shared with server/presets (data.yaml written by cmd_dataset)
-CLASS_OF_SCENE = {"boards_end": 0, "boards_side": 0, "boxes": 1, "pipes": 2}
+CLASS_OF_SCENE = {"boards_end": 0, "boards_side": 0, "boxes": 1, "pipes": 2, "planks_tight": 0}
 CLASS_NAMES = ["board", "box", "pipe"]
 
 
@@ -237,14 +315,14 @@ def _polygon(scene: str, b: Box) -> np.ndarray:
     return np.array([[x1, y1], [x2, y1], [x2, y2], [x1, y2]], np.float64)
 
 
-def cmd_dataset(out: Path, seed: int, n: int, size: int, val_frac: float = 0.15) -> None:
+def cmd_dataset(out: Path, seed: int, n: int, size: int, val_frac: float = 0.15, scenes: list[str] | None = None) -> None:
     """Domain-randomised YOLO-seg dataset: random scene, random crop/zoom,
     random perspective, random lighting. Labels are polygons (rect / circle)."""
     rng = np.random.default_rng(seed)
     for split in ("train", "val"):
         (out / "images" / split).mkdir(parents=True, exist_ok=True)
         (out / "labels" / split).mkdir(parents=True, exist_ok=True)
-    names = list(SCENES)
+    names = scenes or list(SCENES)
     for i in range(n):
         scene = names[i % len(names)]
         img, boxes = SCENES[scene](rng)
@@ -357,6 +435,8 @@ if __name__ == "__main__":
     ap.add_argument("cmd", choices=["images", "video", "dataset"])
     ap.add_argument("--n", type=int, default=600)
     ap.add_argument("--size", type=int, default=640)
+    ap.add_argument("--scenes", default=None, help="comma-separated subset of scenes for `dataset`")
+    ap.add_argument("--texbank", default=None, help="folder of real end-grain crops used as board textures")
     ap.add_argument("--out", type=Path, default=Path("tests/out"))
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--per-scene", type=int, default=3)
@@ -367,9 +447,10 @@ if __name__ == "__main__":
     ap.add_argument("--static", action="store_true", help="no camera motion (for Count & Freeze tests)")
     ap.add_argument("--zoom", type=float, default=1.9, help="scene width as a multiple of the frame width")
     a = ap.parse_args()
+    load_texbank(a.texbank)
     if a.cmd == "images":
         cmd_images(a.out, a.seed, a.per_scene)
     elif a.cmd == "dataset":
-        cmd_dataset(a.out, a.seed, a.n, a.size)
+        cmd_dataset(a.out, a.seed, a.n, a.size, scenes=a.scenes.split(",") if a.scenes else None)
     else:
         cmd_video(a.out, a.seed, a.scene, a.frames, a.width, a.height, a.static, a.zoom)

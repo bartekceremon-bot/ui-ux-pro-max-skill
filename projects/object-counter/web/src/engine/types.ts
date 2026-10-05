@@ -37,6 +37,8 @@ export interface ModelInfo {
   created?: string;
   /** demo model (e.g. trained on synthetic data): listed, but never picked automatically */
   demo?: boolean;
+  /** recommended confidence threshold for this model (calibrated on held-out photos) */
+  conf?: number;
 }
 
 export interface CvOptions {
