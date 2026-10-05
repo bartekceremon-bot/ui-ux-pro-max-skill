@@ -61,6 +61,8 @@ export interface DetectOptions {
   agnostic: boolean;
   /** region of interest in source pixels; detections whose centre is outside are dropped */
   roi: { x1: number; y1: number; x2: number; y2: number } | null;
+  /** keep only detections forming a contiguous stack (drops isolated false positives) */
+  stack: boolean;
   cv: CvOptions;
 }
 

@@ -80,3 +80,14 @@ describe('separator', () => {
     expect(d.every((x) => x.mask && x.mask.data.some((v) => v))).toBe(true);
   });
 });
+
+describe('stack filter', () => {
+  it('keeps the contiguous stack and drops isolated detections', async () => {
+    const { stackFilter } = await import('../src/engine/decode');
+    const stack: Detection[] = [];
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) stack.push(det(100 + c * 42, 100 + r * 22, 140 + c * 42, 120 + r * 22));
+    const noise = [det(600, 500, 640, 520), det(20, 600, 60, 620), det(700, 50, 740, 70)];
+    const out = stackFilter([...stack, ...noise]);
+    expect(out.length).toBe(20);
+  });
+});

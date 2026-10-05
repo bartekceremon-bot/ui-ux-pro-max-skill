@@ -228,3 +228,36 @@ export function postprocess(out: Float32Array, dims: readonly number[], protos: 
     return d;
   });
 }
+
+/**
+ * Stack filter: items of a stack touch or nearly touch each other. Keep the
+ * detections that belong to a contiguous group (neighbours closer than ~0.6x
+ * the typical item size) and drop size outliers -- isolated false positives
+ * on gravel, trucks, walls or sky disappear, the stack itself stays.
+ */
+export function stackFilter<T extends Detection>(dets: T[], minFrac = 0.1): T[] {
+  if (dets.length < 3) return dets;
+  const area = dets.map((d) => (d.x2 - d.x1) * (d.y2 - d.y1));
+  const med = area.slice().sort((a, b) => a - b)[area.length >> 1];
+  const ok = area.map((a) => a > 0.2 * med && a < 5 * med);
+  const md = Math.sqrt(med) * 0.6;
+  const par = dets.map((_, i) => i);
+  const find = (x: number): number => { while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; } return x; };
+  for (let i = 0; i < dets.length; i++) {
+    if (!ok[i]) continue;
+    const a = dets[i];
+    for (let j = i + 1; j < dets.length; j++) {
+      if (!ok[j]) continue;
+      const b = dets[j];
+      const gx = Math.max(0, b.x1 - a.x2, a.x1 - b.x2);
+      const gy = Math.max(0, b.y1 - a.y2, a.y1 - b.y2);
+      if (gx < md && gy < md) par[find(i)] = find(j);
+    }
+  }
+  const size = new Map<number, number>();
+  dets.forEach((_, i) => { if (ok[i]) { const r = find(i); size.set(r, (size.get(r) ?? 0) + 1); } });
+  if (!size.size) return dets;
+  const big = Math.max(...size.values());
+  const keepRoot = new Set([...size].filter(([, n]) => n >= Math.max(3, minFrac * big)).map(([r]) => r));
+  return dets.filter((_, i) => ok[i] && keepRoot.has(find(i)));
+}

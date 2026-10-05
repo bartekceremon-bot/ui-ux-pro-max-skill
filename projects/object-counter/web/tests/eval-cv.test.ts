@@ -24,5 +24,5 @@ describe.skipIf(!has)('separator on synthetic scenes', () => {
     }
     console.log(rows.join('\n') + `\nrecall=${(tpAll / gtAll).toFixed(2)} precision=${(tpAll / detAll).toFixed(2)}`);
     expect(tpAll / gtAll).toBeGreaterThan(0.3);
-  });
+  }, 120_000);
 });

@@ -10,7 +10,7 @@
  * packed items (board ends in a big stack) are much better resolved that way.
  */
 import * as ort from 'onnxruntime-web/webgpu';
-import { dropGroupBoxes, ioMin, nms, postprocess, type Letterbox, type Protos } from './decode';
+import { dropGroupBoxes, ioMin, nms, postprocess, stackFilter, type Letterbox, type Protos } from './decode';
 import { separate } from './separator';
 import type { DetectOptions, DetectResult, Detection, ModelInfo } from './types';
 
@@ -206,6 +206,7 @@ async function handle(msg: InMsg) {
       if (opts.engine === 'cv') dets = detectCv(bitmap, opts);
       else dets = opts.tiled ? await detectAccurate(bitmap, opts) : await runYolo(bitmap, 0, 0, bitmap.width, bitmap.height, opts);
       dets = dets.filter((d) => inRoi(d, opts.roi));
+      if (opts.stack) dets = stackFilter(dets);
       const res: DetectResult = {
         dets, ms: performance.now() - t0, width: bitmap.width, height: bitmap.height,
         backend: opts.engine === 'cv' ? 'cv' : backend,
